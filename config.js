@@ -13,7 +13,7 @@ global.owner = [['5217121649714', 'ＰＲＯＰＩＥＴＡＲＩＯ', true], ['
 global.mods = []
 global.prems = []
 //BETA: Si quiere evitar escribir el número que será bot en la consola, agregué desde aquí entonces:
-global.botNumberCode = "" //Ejemplo: +5217121649714
+global.botNumberCode = "" //Ejemplo: +59309090909
 global.confirmCode = "" 
 global.gataJadibts = true //cambia a false Desactivar en "auto-reconexion" de sub-bots
 
@@ -99,7 +99,7 @@ global.imageUrl = ["https://qu.ax/HJnWj.jpg", "https://qu.ax/ehPzQ.jpg", "https:
 
 //----------------------------[ NIVELES | RPG ]---------------------------------
 
-global.multiplier = 850 // Cuanto más alto, más difícil subir de nivel
+global.multiplier = 1200// Cuanto más alto, más difícil subir de nivel
 global.maxwarn = '4' // máxima advertencias
 
 //---------------[ IDs de canales ]----------------
