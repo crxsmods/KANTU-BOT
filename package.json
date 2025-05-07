@@ -17,13 +17,13 @@
 "test": "node test.js",
 "test2": "nodemon index.js" },
     
-"homepage": "https://github.com/crxsmods/KANTU-BOT",
+"homepage": "https://github.com/elrebelde21/LoliBot-MD",
 "author": {
 "name": "elrebelde21" },
     
 "repository": {
 "type": "git",
-"url": "git+https://github.com/crxsmods/KANTU-BOT.git" },
+"url": "git+https://github.com/elrebelde21/LoliBot-MD.git" },
 
 "bugs": {
 "url": "https://github.com/crxsmods/KANTU-BOT/issues" },
@@ -37,6 +37,7 @@
 "axios": "^1.7.9",
 "hispamemes": "^1.0.7",
 "archiver": "^7.0.1",
+"systeminformation": "^5.17.12",
 "acrcloud": "^1.4.0",
 "form-data": "^4.0.0",
 "cfonts": "^3.3.0",
