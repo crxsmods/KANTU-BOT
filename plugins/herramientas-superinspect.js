@@ -6,9 +6,10 @@ import _ from "lodash";
 import axios from 'axios';
 
 let handler = async (m, { conn, command, usedPrefix, args, text, groupMetadata, isOwner, isROwner }) => {
- const channelUrl = text?.match(/(?:https:\/\/)?(?:www\.)?(?:chat\.|wa\.)?whatsapp\.com\/(?:channel\/|joinchat\/)?([0-9A-Za-z]{22,24})/i)?.[1];
+let fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status@broadcast", "fromMe": false, "id": "Halo" }, "message": { "contactMessage": { "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD` }}, "participant": "0@s.whatsapp.net" }
+const channelUrl = text?.match(/(?:https:\/\/)?(?:www\.)?(?:chat\.|wa\.)?whatsapp\.com\/(?:channel\/|joinchat\/)?([0-9A-Za-z]{22,24})/i)?.[1];
 let txtBotAdminCh = '\n\n> *Verifique que el Bot sea admin en el canal, de lo contrario no funcionará el comando*';
-let thumb = img.getRandom();
+let thumb = m.pp
 let pp, ch, q, mime, buffer, media, inviteUrlch, imageBuffer;
 
 let inviteCode
@@ -102,15 +103,15 @@ return
 }}}
 if (info) {
 await conn.sendMessage(m.chat, { text: info, contextInfo: {
-mentionedJid: conn.parseMention(info),
+mentionedJid: null,
 externalAdReply: {
 title: "🔰 Inspector de Grupos",
-body: packname,
-thumbnailUrl: pp ? pp : thumb,
+body: m.pushName,
+thumbnailUrl: m.pp,
 sourceUrl: args[0] ? args[0] : inviteCode ? `https://chat.whatsapp.com/${inviteCode}` : md,
 mediaType: 1,
 showAdAttribution: false,
-renderLargerThumbnail: false
+renderLargerThumbnail: true
 }}}, { quoted: fkontak })
 } else {
 // Manejo de enlaces de canales
@@ -128,19 +129,19 @@ pp = thumb
 }
 if (channelUrl && newsletterInfo) {
 await conn.sendMessage(m.chat, { text: caption, contextInfo: {
-mentionedJid: conn.parseMention(caption),
+mentionedJid: null,
 externalAdReply: {
 title: "📢 Inspector de Canales",
-body: packname,
-thumbnailUrl: pp,
+body: m.pushName,
+thumbnailUrl: m.pp,
 sourceUrl: args[0],
 mediaType: 1,
 showAdAttribution: false,
-renderLargerThumbnail: false
+renderLargerThumbnail: true
 }}}, { quoted: fkontak })}
 newsletterInfo.id ? conn.sendMessage(m.chat, { text: newsletterInfo.id }, { quoted: null }) : ''
 } catch (e) {
-reportError(e)
+console.log(e)
 }}}}
 handler.help = ["superinspect", "inspect"]
 handler.tags = ['tools'];

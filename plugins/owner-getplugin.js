@@ -5,14 +5,12 @@ let handler = async (m, { usedPrefix, command, text }) => {
   let ar = Object.keys(plugins);
   let ar1 = ar.map(v => v.replace('.js', ''));
 
-  if (!text) {
-    throw `*¿Qué buscar?*\nEjemplo:\n${usedPrefix + command} sticker`;
-  }
+  if (!text) return m.reply( `*¿Qué buscar?*\nEjemplo:\n${usedPrefix + command} sticker`)
 
   let results = fuzzysort.go(text, ar1);
 
   if (results.length === 0) {
-    return m.reply(`'${text}' no encontrado.\n\nSugerencias:\n${ar1.map(v => ' ' + v).join`\n`}`);
+   return m.reply(`'${text}' no encontrado.\n\nSugerencias:\n${ar1.map(v => ' ' + v).join`\n`}`);
   }
 
   let match = results[0].target;

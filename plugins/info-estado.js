@@ -1,6 +1,5 @@
-
 let handler = async (m, { conn, command, usedPrefix }) => {
-let name = await conn.getName(m.sender)
+let name = m.pushName 
 let usuario = `${m.sender.split("@")[0]}`
 let aa = usuario + '@s.whatsapp.net'
 let _uptime = process.uptime() * 1000
@@ -12,7 +11,7 @@ let fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status
 let uptime = clockString(_uptime)
 let estado = `${pickRandom([`*┌───⊷ *ミ🤖 Estado del Bot 🤖彡*\n┆ *=> Bot activo ✅*\n┆┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n┆ *=> Bot uso público ✅️*\n┆┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n┆=> 𝘼𝙘𝙩𝙞𝙫𝙤 𝙙𝙪𝙧𝙖𝙣𝙩𝙚\n┆=> ${uptime} ✅\n╰──────────────────`, `*Online ${uptime} ✅*`, `*Saturado 🥵*`, `Estoy activo desde: ${uptime}`, `Estamos activo papu 🤙`])}
 `.trim()
-await conn.sendMessage(m.chat, {text: estado, mentions: [m.sender]}, {quoted: fkontak})
+await conn.fakeReply(m.chat,  estado, m.sender, `Uptime: ${uptime}`, 'status@broadcast');
 /*await conn.reply(m.chat, `┌───⊷ *ミ🤖 Estado del Bot 🤖彡*
 ┆ *=> Bot activo ✅*
 ┆┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈

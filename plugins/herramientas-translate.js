@@ -1,30 +1,58 @@
-import translate from '@vitalets/google-translate-api';
 import fetch from 'node-fetch';
-const handler = async (m, {args, usedPrefix, command}) => {
-const msg = `*⚠️ 𝐔𝐬𝐨 𝐜𝐨𝐫𝐫𝐞𝐜𝐭𝐨 𝐝𝐞𝐥 𝐜𝐨𝐦𝐚𝐧𝐝𝐨 ${usedPrefix + command} (idioma) (texto)*\n*• 𝐄𝐣𝐞𝐦𝐩𝐥𝐨:*\n*${usedPrefix + command} es Hello*\n\n> *𝐂𝐨𝐧𝐨𝐜𝐞 𝐥𝐨𝐬 𝐢𝐝𝐢𝐨𝐦𝐚𝐬 𝐚𝐝𝐦𝐢𝐭𝐢𝐝𝐨𝐬 𝐞𝐧:*\nhttps://cloud.google.com/translate/docs/languages`;
-if (!args || !args[0]) return m.reply(msg);
-let lang = args[0];
-let text = args.slice(1).join(' ');
+
+const handler = async (m, { args, usedPrefix, command }) => {
 const defaultLang = 'es';
-if ((args[0] || '').length !== 2) {
-lang = defaultLang;
-text = args.join(' ');
-}
-if (!text && m.quoted && m.quoted.text) text = m.quoted.text;
-try {
-const result = await translate(`${text}`, {to: lang, autoCorrect: true});
-await m.reply('*Traducción:* ' + result.text);
-} catch {
-try {
-const lol = await fetch(`https://api.lolhuman.xyz/api/translate/auto/${lang}?apikey=${lolkeysapi}&text=${text}`);
-const loll = await lol.json();
-const result2 = loll.result.translated;
-await m.reply('*Traducción:* ' + result2);
-} catch {
-await m.reply('*[❗𝐈𝐍𝐅𝐎❗] ERROR, VUELVA A INTENTARLO*');
-}}};
-handler.help = ['traducir', 'translate']
-handler.tags = ['tools']
+if (!args || !args[0]) return m.reply(`⚠️ *Uso correcto del comando:*  
+» ${usedPrefix + command} (idioma destino) (texto a traducir)
+
+📌 *Ejemplos:*
+• ${usedPrefix + command} es Hello » Español
+• ${usedPrefix + command} en hola » inglés
+• ${usedPrefix + command} fr buenos días » Francés
+• ${usedPrefix + command} pt tudo bem » Portugués
+• ${usedPrefix + command} de cómo estás » Alemán
+• ${usedPrefix + command} it buongiorno » Italiano`);
+
+  let lang = args[0];
+  let text = args.slice(1).join(' ');
+
+  if ((lang || '').length !== 2) {
+    text = args.join(' ');
+    lang = defaultLang;
+  }
+
+  if (!text && m.quoted && m.quoted.text) text = m.quoted.text;
+
+  if (!text) return m.reply(msg);
+
+  try {
+    const res = await fetch("https://tr.skyultraplus.com/translate", {
+      method: "POST",
+      body: JSON.stringify({
+        q: text,
+        source: "auto",
+        target: lang,
+        format: "text",
+        alternatives: 3,
+        api_key: ""
+      }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const json = await res.json();
+
+    if (!json || !json.translatedText) throw '❌ No se pudo traducir.';
+
+    await m.reply(`*Traducción:*\n${json.translatedText}`);
+  } catch (e) {
+    console.error(e);
+    await m.reply('*[❗𝐈𝐍𝐅𝐎❗] ERROR, VUELVA A INTENTARLO*');
+  }
+};
+
+handler.help = ['traducir', 'translate'];
+handler.tags = ['tools'];
 handler.command = /^(translate|traducir|trad)$/i;
-handler.register = true 
+handler.register = true;
+
 export default handler;

@@ -1,51 +1,52 @@
-let handler = async (m, { conn, command, text }) => {
+import { db } from "../lib/postgres.js";
 
-if (command == 'añadirdiamantes' || command == 'dardiamantes' || command == 'addlimit') {
-const pajak = 0;
-let who;
-if (m.isGroup) who = m.mentionedJid[0];
-else who = m.chat;
-if (!who) return m.reply(`⚠️ etiqueta a una persona con el @tag`) 
-const txt = text.replace('@' + who.split`@`[0], '').trim();
-if (!txt) return m.reply(`⚠️ Ingresa la cantidad que desea agregar`)   
-if (isNaN(txt)) return m.reply(`⚠️ Falta el Num`)   
-const dmt = parseInt(txt);
-let limit = dmt;
-const pjk = Math.ceil(dmt * pajak);
-limit += pjk; 
-if (limit < 1) return m.reply(`⚠️ No tiene `) 
-const users = global.db.data.users;
-users[who].limit += dmt;
-m.reply(`*≡ 💎 ＳＥ ＡＧＲＥＧＡＤＯ:*
-┏╍╍╍╍╍╍╍╍╍╍╍╍╍
-┃• *𝗍᥆𝗍ᥲᥣ:* ${dmt}
-┗╍╍╍╍╍╍╍╍╍╍╍╍╍`)}
+let handler = async (m, { command, text }) => {
+let who = m.isGroup ? m.mentionedJid?.[0] : m.chat;
+if (!who) return m.reply("⚠️ Etiqueta a una persona con el @tag");
+let idFinal = who;
 
-if (command == 'añadirxp' || command == 'addexp' || command == 'addxp') {
-const pajak = 0;
-let who;
-if (m.isGroup) who = m.mentionedJid[0];
-else who = m.chat;
-if (!who) return m.reply(`⚠️ etiqueta a una persona con el @tag`) 
-const txt = text.replace('@' + who.split`@`[0], '').trim();
-if (!txt) return m.reply(`⚠️ Ingresa la cantidad que desea agregar`)   
-if (isNaN(txt)) return m.reply(`⚠️ Falta el Num`)   
-const xp = parseInt(txt);
-let exp = xp;
-const pjk = Math.ceil(xp * pajak);
-exp += pjk;
-if (exp < 1) return m.reply(`⚠️ Se `) 
-const users = global.db.data.users;
-users[who].exp += xp;
-m.reply(`*≡ ＥＸＰ ＡＧＲＥＧＡＤＯ:*
-┏╍╍╍╍╍╍╍╍╍╍╍╍╍
-┃• *𝗍᥆𝗍ᥲᥣ:* ${xp}
-┗╍╍╍╍╍╍╍╍╍╍╍╍╍`)
-}}
-handler.help = ['addexp', 'addlimit']
-handler.tags = ['owner']
-handler.command = /^(añadirdiamantes|dardiamantes|addlimit|añadirxp|addexp|addxp)$/i
-handler.rowner = true
-handler.register = true 
-export default handler
+if (idFinal.includes("@lid")) {
+const result = await db.query(`SELECT num FROM usuarios WHERE lid = $1`, [idFinal]);
+if (!result.rowCount) return m.reply("❌ No se encontró al usuario con ese LID en la base de datos.");
+const numero = result.rows[0].num;
+idFinal = numero + "@s.whatsapp.net";
+}
 
+const cleanJid = idFinal.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
+const cantidad = parseInt(text.match(/\d+/)?.[0]);
+if (!cantidad || isNaN(cantidad)) return m.reply("⚠️ Ingresa una cantidad válida");
+try {
+const res = await db.query(`SELECT id FROM usuarios WHERE id = $1`, [cleanJid]);
+if (!res.rowCount) return m.reply("❌ Ese usuario no está registrado en la base de datos.");
+let resultado;
+
+if (/addlimit|añadirdiamantes|dardiamantes/i.test(command)) {
+resultado = await db.query(`UPDATE usuarios SET limite = limite + $1 WHERE id = $2 RETURNING limite`, [cantidad, cleanJid]);
+return m.reply(`*≡ 💎 DIAMANTES AGREGADOS:*\n┏━━━━━━━━━━━━\n┃• *𝗍᥆𝗍ᥲᥣ:* ${cantidad}\n┗━━━━━━━━━━━━`);
+}
+
+if (/removelimit|quitardiamantes|sacardiamantes/i.test(command)) {
+resultado = await db.query(`UPDATE usuarios SET limite = GREATEST(0, limite - $1) WHERE id = $2 RETURNING limite`, [cantidad, cleanJid]);
+return m.reply(`*≡ 💎 DIAMANTES QUITADOS:*\n┏━━━━━━━━━━━━\n┃• *𝗍᥆𝗍ᥲ᥹:* ${cantidad}\n┗━━━━━━━━━━━━`);
+}
+
+if (/addexp|añadirxp|addxp/i.test(command)) {
+resultado = await db.query(`UPDATE usuarios SET exp = exp + $1 WHERE id = $2 RETURNING exp`, [cantidad, cleanJid]);
+return m.reply(`*≡ ✨ EXP AGREGADO:*\n┏━━━━━━━━━━━━\n┃• *𝗍᥆𝗍ᥲᥣ:* ${cantidad}\n┗━━━━━━━━━━━━`);
+}
+
+if (/removexp|quitarxp|sacarexp/i.test(command)) {
+resultado = await db.query(`UPDATE usuarios SET exp = GREATEST(0, exp - $1) WHERE id = $2 RETURNING exp`, [cantidad, cleanJid]);
+return m.reply(`*≡ ✨ EXP QUITADO:*\n┏━━━━━━━━━━━━\n┃• *𝗍᥆𝗍ᥲ᥹:* ${cantidad}\n┗━━━━━━━━━━━━`);
+}
+} catch (e) {
+console.error(e);
+return m.reply("❌ Error al modificar datos.");
+}};
+handler.help = ['addexp', 'addlimit', 'removexp', 'removelimit'];
+handler.tags = ['owner'];
+handler.command = /^(añadirdiamantes|dardiamantes|addlimit|removelimit|quitardiamantes|sacardiamantes|añadirxp|addexp|addxp|removexp|quitarxp|sacarexp)$/i;
+handler.owner = true;
+handler.register = true;
+
+export default handler;

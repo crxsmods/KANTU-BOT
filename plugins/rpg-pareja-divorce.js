@@ -1,17 +1,20 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-const user = global.db.data.users[m.sender];
-let targetUser = m.mentionedJid[0] || args[0]; 
-if (!targetUser) return m.reply("⚠️ Debes etiquetar a la persona con la que deseas divorciarte.");
-if (!user.marry || user.marry !== targetUser) return m.reply("⚠️ No estás casado con esta persona para poder divorciarte.");
+const handler = async (m, { conn, args }) => {
+const targetId = m.mentionedJid[0] || args[0]
+if (!targetId) return m.reply("⚠️ Debes etiquetar a la persona con la que deseas divorciarte.")
 
-global.db.data.users[user.marry] = global.db.data.users[user.marry] || {}; 
-global.db.data.users[user.marry].marry = null;
-global.db.data.users[m.sender].marry = null; 
-conn.reply(m.chat, `@${m.sender.split('@')[0]} (${global.db.data.users[m.sender].name}) se Divorcio de @${targetUser.split('@')[0]} (${global.db.data.users[targetUser].name}) ahora están separados 😔\n\nEspero Vuelvan.`, m, { mentions: [m.sender, targetUser] });
-};
-handler.help = ['divorce <@tag>'];
-handler.tags = ['econ'];
-handler.command = ['divorce'];
-handler.register = true;
+const userRes = await m.db.query('SELECT marry FROM usuarios WHERE id = $1', [m.sender])
+const user = userRes.rows[0]
+if (!user || !user.marry || user.marry !== targetId) return m.reply("⚠️ No estás casado con esta persona para poder divorciarte.")
 
-export default handler;
+await m.db.query('UPDATE usuarios SET marry = NULL WHERE id = $1', [m.sender])
+await m.db.query('UPDATE usuarios SET marry = NULL WHERE id = $1', [targetId])
+const nombre1 = await conn.getName(m.sender)
+const nombre2 = await conn.getName(targetId)
+return conn.reply(m.chat, `@${m.sender.split('@')[0]} (${nombre1}) se divorció de @${targetId.split('@')[0]} (${nombre2}) ahora están separados 🫣`, m, { mentions: [m.sender, targetId] })
+}
+handler.help = ['divorce <@tag>']
+handler.tags = ['econ']
+handler.command = ['divorce']
+handler.register = true
+
+export default handler

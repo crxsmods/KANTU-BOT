@@ -1,98 +1,74 @@
 import fetch from 'node-fetch'
-import fs from 'fs'
-let handler = async (m, { conn, args, participants, usedPrefix }) => {
-let users = Object.entries(global.db.data.users).map(([key, value]) => { 
-return {...value, jid: key}
-  })
-let sortedExp = users.map(toNumber('exp')).sort(sort('exp'))
-let sortedLim = users.map(toNumber('limit')).sort(sort('limit'))
-let sortedLevel = users.map(toNumber('level')).sort(sort('level'))
-let sortedRole = users.map(toNumber('role')).sort(sort('role'))
-let sortedMoney = users.map(toNumber('money')).sort(sort('money'))
-let sortedJoincount = users.map(toNumber('joincount')).sort(sort('joincount'))
-let sortedPremium = users.map(toNumber('premium')).sort(sort('premium'))
-let usersExp = sortedExp.map(enumGetKey)
-let usersLim = sortedLim.map(enumGetKey)
-let usersLevel = sortedLevel.map(enumGetKey)
-let usersRole = sortedRole.map(enumGetKey)
-let usersMoney = sortedMoney.map(enumGetKey)
-let usersJoincount = sortedJoincount.map(enumGetKey)
-let usersPremium = sortedPremium.map(enumGetKey)
-           
-console.log(participants)
-let len = args[0] && args[0].length > 0 ? Math.min(100, Math.max(parseInt(args[0]), 10)) : Math.min(10, sortedExp.length)
-let text = `\`🏆 𝚃𝙰𝙱𝙻𝙰 𝙳𝙴 𝙲𝙻𝙰𝚂𝙸𝙲𝙰𝙲𝙸𝙾𝙽\`
-    
-💠 *𝐓𝐎𝐏 ${len} 𝐗𝐏 🎯* 
-𝐓𝐮: *${usersExp.indexOf(m.sender) + 1}* 𝐝𝐞 *${usersExp.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
+const cooldowns = new Map()
+const COOLDOWN_DURATION = 180000 // 3 min
 
-${sortedExp.slice(0, len).map(({ jid, exp }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} *${exp} ⚡*`).join`\n`}
+let handler = async (m, { conn, args }) => {
+const chatId = m.chat
+const now = Date.now()
+const chatData = cooldowns.get(chatId) || { lastUsed: 0, rankingMessage: null }
+ const timeLeft = COOLDOWN_DURATION - (now - chatData.lastUsed)
+
+if (timeLeft > 0) {
+const secondsLeft = Math.ceil(timeLeft / 1000)
+const minutes = Math.floor(secondsLeft / 60)
+const remainingSeconds = secondsLeft % 60
+const timeMessage = minutes > 0 ? `${minutes} min${minutes !== 1 ? 's' : ''}${remainingSeconds > 0 ? ` y ${remainingSeconds} seg${remainingSeconds !== 1 ? 's' : ''}` : ''}` : `${remainingSeconds} seg${remainingSeconds !== 1 ? 's' : ''}`
+
+await conn.reply(m.chat, `「 ꛕ 」 Hola @${m.sender.split('@')[0]}, para evitar la saturación del chat, el ranking solo se puede generar cada 3 minutos. Desliza hacia arriba para ver la tabla actual 👆`, chatData.rankingMessage || m)
+return
+}
+
+const res = await m.db.query('SELECT id, nombre, exp, limite, money, banco FROM usuarios')
+const users = res.rows.map(u => ({ ...u, jid: u.id }))
+const sortedExp = [...users].sort((a, b) => b.exp - a.exp)
+const sortedLim = [...users].sort((a, b) => b.limite - a.limite)
+const sortedMoney = [...users].sort((a, b) => b.money - a.money)
+const sortedBanc = [...users].sort((a, b) => b.banco - a.banco)
+
+const len = args[0] ? Math.min(100, Math.max(parseInt(args[0]), 10)) : Math.min(10, sortedExp.length)
+
+const format = (list, prop, icon) =>
+list.slice(0, len).map(({ jid, [prop]: value, nombre }, i) =>
+`${i + 1}. @${jid.split('@')[0]} *${formatNumber(value)}* (${value}) ${icon}`).join('\n')
+
+const text = `\`🏆 𝚃𝙰𝙱𝙻𝙰 𝙳𝙴 𝙲𝙻𝙰𝚂𝙸𝙲𝙰𝙲𝙸𝙾𝙽\`
+
+💠 *𝐓𝐎𝐏 ${len} 𝐗𝐏 🎯* 
+𝐓𝐮: *${sortedExp.findIndex(u => u.jid === m.sender) + 1}* 𝐝𝐞 *${sortedExp.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
+${format(sortedExp, 'exp', '⚡')}
 
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
 💠 *𝐓𝐎𝐏 ${len} 𝐃𝐈𝐀𝐌𝐀𝐍𝐓𝐄 💎* 
-𝐓𝐮 : *${usersLim.indexOf(m.sender) + 1}* 𝐝𝐞́ *${usersLim.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
-
-${sortedLim.slice(0, len).map(({ jid, limit }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} *${limit} 💎*`).join`\n`}
-
-┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
-
-💠 *𝐓𝐎𝐏 ${len} 𝐍𝐈𝐕𝐄𝐋 💪* 
-𝐓𝐮 : *${usersLevel.indexOf(m.sender) + 1}* 𝐝𝐞 *${usersLevel.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
-
-${sortedLevel.slice(0, len).map(({ jid, level }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} *${level} 🔅*`).join`\n`}
+𝐓𝐮: *${sortedLim.findIndex(u => u.jid === m.sender) + 1}* 𝐝𝐞 *${sortedLim.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
+${format(sortedLim, 'limite', '💎')}
 
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-💠 *𝐓𝐎𝐏 ${len} 𝐑𝐎𝐋 🌟* 
-𝐓𝐮 : *${usersLevel.indexOf(m.sender) + 1}* 𝐝𝐞 *${usersLevel.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
-
-${sortedLevel.slice(0, len).map(({ jid, role, level }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} ${role}`).join`\n`}
-
-┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
-
-💠 *𝐓𝐎𝐏 ${len} 𝐔𝐒𝐔𝐀𝐑𝐈𝐎𝐒 𝐏𝐑𝐄𝐌𝐈𝐔𝐌 🎟️* 
-𝐓𝐮 : *${usersLevel.indexOf(m.sender) + 1}* 𝐝𝐞 *${usersLevel.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
-
-${sortedLim.slice(0, len).map(({ jid, premium, level }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} *${premium ? `✅` : `❌`} 🎟️*`).join`\n`}
+💠 *𝐓𝐎𝐏 ${len} KANTUCOINS 🪙*
+𝐓𝐮: *${sortedMoney.findIndex(u => u.jid === m.sender) + 1}* 𝐝𝐞 *${sortedMoney.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
+${format(sortedMoney, 'money', '🪙')}
 
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-💠 *𝐓𝐎𝐏 ${len} 𝐓𝐎𝐊𝐄𝐍𝐒 🧿* 
-𝐓𝐮 : *${usersJoincount.indexOf(m.sender) + 1}* 𝐝𝐞 *${usersJoincount.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
-
-${sortedJoincount.slice(0, len).map(({ jid, joincount }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} *${joincount} 🧿*`).join`\n`}
-
-┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
-
-💠 *𝐓𝐎𝐏 ${len} ᴋᴀɴᴛᴜ𝐂𝐎𝐈𝐍𝐒 🪙*
-𝐓𝐮 : *${usersMoney.indexOf(m.sender) + 1}* 𝐝𝐞 *${usersMoney.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
-
-${sortedMoney.slice(0, len).map(({ jid, money }, i) => `${i + 1}. ${participants.some(p => jid === p.jid) ? `(${conn.getName(jid)}) wa.me/` : '@'}${jid.split`@`[0]} *${money} 🪙*`).join`\n`}
+💠 *𝐓𝐎𝐏 ${len} 𝐌𝐈𝐋𝐋𝐎𝐍𝐀𝐑𝐈𝐎𝐒 💵* _(Usuarios con mas dinero en el banco)_
+𝐓𝐮: *${sortedBanc.findIndex(u => u.jid === m.sender) + 1}* 𝐝𝐞 *${sortedBanc.length} 𝐮𝐬𝐮𝐚𝐫𝐢𝐨𝐬*
+${format(sortedBanc, 'banco', '💵')}
 `.trim()
-await m.reply(text, null, { mentions: conn.parseMention(text) })
-//conn.sendMessage(m.chat, {text: text, contextInfo:{ mentionedJid: conn.parseMention(text)}}, { quoted: m})
+
+const rankingMessage = await m.reply(text, null, { mentions: conn.parseMention(text) })
+cooldowns.set(chatId, { lastUsed: now, rankingMessage })
 }
 handler.help = ['top']
 handler.tags = ['econ']
-handler.command = ['leaderboard', 'lb', 'top'] 
+handler.command = ['leaderboard', 'lb']
 handler.register = true
-handler.fail = null
 handler.exp = 3500
+
 export default handler
 
-function sort(property, ascending = true) {
-if (property) return (...args) => args[ascending & 1][property] - args[!ascending & 1][property]
-else return (...args) => args[ascending & 1] - args[!ascending & 1]
-}
-
-function toNumber(property, _default = 0) {
-if (property) return (a, i, b) => {
-return {...b[i], [property]: a[property] === undefined ? _default : a[property]}
-}
-else return a => a === undefined ? _default : a
-}
-
-function enumGetKey(a) {
-return a.jid
+function formatNumber(num) {
+  return num >= 1e6 ? (num / 1e6).toFixed(1) + 'M'
+       : num >= 1e3 ? (num / 1e3).toFixed(1) + 'k'
+       : num.toString()
 }

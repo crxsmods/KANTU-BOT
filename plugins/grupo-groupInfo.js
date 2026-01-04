@@ -1,38 +1,42 @@
-let handler = async (m, { conn, participants, groupMetadata }) => {
-const pp = await conn.profilePictureUrl(m.chat, 'image').catch(_ => null) || imagen
-const { isBanned, welcome, detect, sWelcome, sBye, sPromote, sDemote, antiLink, antifake, antiTiktok, antiYoutube, antiTelegram, modoadmin, antiFacebook, antiInstagram, antiTwitter, antiDiscord, antiTwitch, antiThreads, delete: del } = global.db.data.chats[m.chat]
-const groupAdmins = participants.filter(p => p.admin)
-const listAdmin = groupAdmins.map((v, i) => `${i + 1}. @${v.id.split('@')[0]}`).join('\n')
-const owner = groupMetadata.owner || groupAdmins.find(p => p.admin === 'superadmin')?.id || m.chat.split`-`[0] + '@s.whatsapp.net'
-let socialMediaConfig = ''
-const socialMedia = [{ name: 'Tiktok', value: antiTiktok },
-{ name: 'Youtube', value: antiYoutube },
-{ name: 'Telegram', value: antiTelegram },
-{ name: 'Fb', value: antiFacebook },
-{ name: 'Ig', value: antiInstagram },
-{ name: 'Twitter (x)', value: antiTwitter },
-{ name: 'Discord', value: antiDiscord },
-{ name: 'Twitch', value: antiTwitch },
-{ name: 'Threads', value: antiThreads }
-]
+import { db } from '../lib/postgres.js'
 
-const activeSocialMedia = socialMedia.filter(sm => sm.value)
-if (activeSocialMedia.length > 0) {
-socialMediaConfig = activeSocialMedia.map(sm => `• Anti ${sm.name}: ✅`).join('\n')
+let handler = async (m, { conn }) => {
+const pp = await conn.profilePictureUrl(m.chat, 'image').catch(_ => "https://upload.hackstorex.com/uploads/378d0128dc220b4859ce4e09d5b90a2b.jpg")
+
+let groupMetadata
+try {
+groupMetadata = await conn.groupMetadata(m.chat)
+} catch {
+return m.reply('*⚠️ Error al obtener información del grupo. Intenta nuevamente más tarde.*')
+}
+const participants = groupMetadata.participants || []
+const groupAdmins = participants.filter(p => p.admin)
+const usarLid = participants.some(p => p.id?.endsWith?.('@lid'))
+const listAdmin = await Promise.all(groupAdmins.map(async (v, i) => {
+let numero = null
+if (usarLid && v.id.endsWith('@lid')) {
+const res = await db.query('SELECT num FROM usuarios WHERE lid = $1', [v.id])
+numero = res.rows[0]?.num || null
+} else if (/^\d+@s\.whatsapp\.net$/.test(v.id)) {
+numero = v.id.split('@')[0]
+}
+return `➥ ${numero ? `@${numero}` : `@Usuarios`}`
+}))
+
+const { rows } = await db.query(`SELECT * FROM group_settings WHERE group_id = $1`, [m.chat])
+const data = rows[0] || {}
+const { welcome, detect, antifake, antilink, modoadmin, primary_bot, modohorny, nsfw_horario, banned } = data
+const fallbackOwner = m.chat.includes('-') ? m.chat.split('-')[0] + '@s.whatsapp.net' : null
+const owner = groupMetadata.owner || groupAdmins.find(p => p.admin === 'superadmin')?.id || fallbackOwner || "Desconocido"
+
+let primaryBotMention = ''
+if (primary_bot) {
+const allBots = [conn, ...global.conns.filter(bot => bot.user && bot.ws?.socket?.readyState !== 3)]
+const selectedBot = allBots.find(bot => bot.user.jid === primary_bot)
+primaryBotMention = `@${primary_bot.split('@')[0]}`
 }
 
-let primaryBotMention = '';
-let chat = global.db.data.chats[m.chat];
-if (chat.primaryBot) {
-const allBots = [conn, ...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED)];
-const selectedBot = allBots.find(bot => bot.user.jid === chat.primaryBot);
-if (selectedBot) {
-primaryBotMention = `@${chat.primaryBot.split('@')[0]}`;
-} else {
-primaryBotMention = `@${chat.primaryBot.split('@')[0]}`;
-}}
-
-let text = `『 ＩＮＦＯ ＤＥ ＧＲＵＰＯ 』
+const text = `『 ＩＮＦＯ ＤＥ ＧＲＵＰＯ 』
 
 *• ID :* 
 ${groupMetadata.id}
@@ -47,20 +51,23 @@ ${participants.length}
 @${owner.split('@')[0]}
 
 *• Admins :*
-${listAdmin} 
+${listAdmin.join('\n')}
 
-*• 𝙲𝙾𝙽𝙵𝙸𝙶𝚄𝚁𝙰𝙽𝙲𝙸𝙾𝙽 𝙳𝙴𝙻 𝙶𝚁𝚄𝙿𝙾 :*
-*• Bot : ${modoadmin ? 'Apagado 📴' : `${primaryBotMention ? `Online (${primaryBotMention})` : 'Online'} ✅`} 
+*• 𝙲𝙾𝙽𝙵𝙸𝙶𝚄𝚁𝙰𝙲𝙸𝙾𝙽 𝙳𝙴𝙻 𝙶𝚁𝚄𝙿𝙾 :*
+• Bot : ${modoadmin ? 'Apagado 📴' : `${primaryBotMention || 'Online ✅'}`} 
 • Bienvenida: ${welcome ? '✅' : '❌'}
-• AntiLink: ${antiLink ? '✅' : '❌'}
+• AntiLink: ${antilink ? '✅' : '❌'}
 • AntiFake: ${antifake ? '✅' : '❌'}
-• Event: ${detect ? '✅' : '❌'}
-• Anti eliminar: ${del ? '✅' : '❌'} ${socialMediaConfig ? '\n' + socialMediaConfig : ''}`.trim()
-conn.sendFile(m.chat, pp, 'pp.jpg', text, m, false, { mentions: [...groupAdmins.map(v => v.id), owner] })
+• Detect: ${detect ? '✅' : '❌'}
+• Modo horny: ${modohorny ? '✅' : '❌'}
+• NSFW horario permitido: ${nsfw_horario ? `🕒 (${nsfw_horario})` : '❌'}
+• Grupo baneado: ${banned ? '🚫 Sí' : '✅ No'}
+`.trim()
+await conn.sendFile(m.chat, pp, 'pp.jpg', text, m)
 }
 handler.help = ['infogp']
 handler.tags = ['group']
-handler.command = ['infogrupo', 'groupinfo', 'infogp'] 
+handler.command = ['infogrupo', 'groupinfo', 'infogp']
 handler.group = true
 handler.register = true
 

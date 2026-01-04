@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 let handler = async (m, { conn, isROwner, text }) => {
-if (!process.send) throw 'Dont: node main.js\nDo: node index.js'
+//if (!process.send) throw 'Dont: node main.js\nDo: node index.js'
 if (conn.user.jid == conn.user.jid) {
 async function loading() {
 var hawemod = ["10%", "30%", "50%", "80%", "100%" ]
@@ -10,7 +10,7 @@ await new Promise(resolve => setTimeout(resolve, 1000));
 await conn.sendMessage(m.chat, {text: hawemod[i], edit: key}, {quoted: m})}
 await conn.sendMessage(m.chat, {text: `🚀 Reiniciando Bot...\nPor favor espere un momento`, edit: key}, {quoted: m});         
 //process.send("reset")
-process.exit()
+process.exit(0); 
 }
 loading()     
 } else throw 'eh'
@@ -18,7 +18,7 @@ loading()
 handler.help = ['restart']
 handler.tags = ['owner']
 handler.command = ['restart','reiniciar'] 
-handler.rowner = true
+handler.owner = true
 export default handler
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))

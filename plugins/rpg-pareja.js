@@ -1,57 +1,52 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-const user = global.db.data.users[m.sender];
+//Código elaborado por: https://github.com/elrebelde21
+
+const handler = async (m, { conn, args }) => {
+const res = await m.db.query('SELECT marry FROM usuarios WHERE id = $1', [m.sender])
+const user = res.rows[0]
+
 if (user.marry) {
-let spouse = global.db.data.users[user.marry];
-if (user.marry === m.mentionedJid[0]) return conn.reply(m.chat, `⚠️ Ya estás casado con @${user.marry.split('@')[0]}. No necesitas casarte de nuevo con la misma persona 🤨`, m, { mentions: [m.sender] });
-
-const spouseName = spouse ? spouse.name : 'sin name';
-conn.reply(m.chat, `⚠️ Ya estás casado con @${user.marry.split('@')[0]} (${spouseName}).\n¿Acaso le vas a ser infiel? 🤨`, m, { mentions: [m.sender] });
-return;
+const pareja = await m.db.query('SELECT nombre FROM usuarios WHERE id = $1', [user.marry])
+const spouseName = pareja.rows[0]?.nombre || 'sin nombre'
+if (user.marry === (m.mentionedJid[0] || '')) return conn.reply(m.chat, `⚠️ Ya estás casado con @${user.marry.split('@')[0]}. No necesitas casarte de nuevo con la misma persona 🤨`, m, { mentions: [m.sender] })
+return conn.reply(m.chat, `⚠️ Ya estás casado con @${user.marry.split('@')[0]} (${spouseName}).\n¿Acaso le vas a ser infiel? 🤨`, m, { mentions: [m.sender] })
 }
 
-let mentionedUser = m.mentionedJid[0] || ''; 
-if (!mentionedUser) throw '⚠️ Etiquetas a la persona con la que quiere mandarle una solicitud de matrimonio con en @tag'; 
-if (mentionedUser === m.sender) return conn.reply(m.chat, "⚠️ Wtf No puedes casarte contigo mismo. ¿Te vas a enamorar de ti mismo? 😆", m);
-let targetUser = global.db.data.users[mentionedUser];
-if (!targetUser) throw '⚠️ El usuario al que intentas casar no está en mi base de datos.';
+const mentionedUser = m.mentionedJid[0]
+if (!mentionedUser) return m.reply('⚠️ Etiqueta a la persona con la que te quieres casar usando @tag')
+if (mentionedUser === m.sender) return m.reply("⚠️ No puedes casarte contigo mismo")
 
-if (targetUser.marry) {
-let spouse = global.db.data.users[targetUser.marry];
-const spouseName = spouse ? spouse.name : 'sin name';
-throw `⚠️ El usuario @${mentionedUser.split('@')[0]} (${targetUser.name}) ya está casado con @${spouse.marry.split('@')[0]} (${spouseName}).`;
+const check = await m.db.query('SELECT marry FROM usuarios WHERE id = $1', [mentionedUser])
+if (!check.rows[0]) return m.reply('⚠️ El usuario al que intentas casar no está en mi base de datos.')
+if (check.rows[0].marry) return m.reply(`⚠️ El usuario ya está casado con alguien más`)
+
+await m.db.query('UPDATE usuarios SET marry_request = $1 WHERE id = $2', [m.sender, mentionedUser])
+await conn.reply(m.chat, `💍 *@${m.sender.split('@')[0]}* se está declarando!! 😳\n@${mentionedUser.split('@')[0]} responde:\n\n❤️ Escribe *Aceptar*\n💔 Escribe *Rechazar*`, m, { mentions: [m.sender, mentionedUser] })
+
+setTimeout(async () => {
+const again = await m.db.query('SELECT marry_request FROM usuarios WHERE id = $1', [mentionedUser])
+if (again.rows[0]?.marry_request) {
+await m.db.query('UPDATE usuarios SET marry_request = NULL WHERE id = $1', [mentionedUser])
+await conn.reply(m.chat, '⚠️ El tiempo para aceptar o rechazar ha expirado.', m)
+}}, 60000)
 }
-
-let text = `💍 *@${m.sender.split('@')[0]}* se esta declarado!! 😳\nPor favor @${mentionedUser.split('@')[0]} Responder a la declaración 🙀\n\n❤️ *_Si quieres una Relacion escriba:_*\n\n- *Aceptar*\n\n💔 *_De no querer una Relacion escriba:_*\n- *Rechazar*.`;
-targetUser.marryRequest = m.sender;
-conn.reply(m.chat, text, m, { mentions: [mentionedUser, m.sender] });
-
-setTimeout(() => {
-if (global.db.data.users[mentionedUser].marryRequest) {
-delete global.db.data.users[mentionedUser].marryRequest;
-conn.reply(m.chat, `⚠️ El tiempo para aceptar o rechazar la solicitud ha expirado.`, m);
-}}, 60000);  //1 min
-};
 
 handler.before = async (m) => {
-const targetId = m.sender; 
-if (!global.db.data.users[targetId].marryRequest) return;
-const response = m.text.toLowerCase();
-const requesterId = global.db.data.users[targetId].marryRequest;
+const res = await m.db.query('SELECT marry_request FROM usuarios WHERE id = $1', [m.sender])
+const req = res.rows[0]?.marry_request
+if (!req) return
 
+const response = m.originalText.toLowerCase()
 if (response === 'aceptar') {
-global.db.data.users[requesterId].marry = targetId;  
-global.db.data.users[targetId].marry = requesterId;
-delete global.db.data.users[requesterId].marryRequest;
-delete global.db.data.users[targetId].marryRequest;
-m.reply(`✅ ¡Felicidades tenemos una boba en grupos 🥳\n\n@${requesterId.split('@')[0]} (${global.db.data.users[requesterId].name}) y @${targetId.split('@')[0]} (${global.db.data.users[targetId].name}) ahora están casados.`, null, { mentions: [requesterId, targetId] });
+await m.db.query('UPDATE usuarios SET marry = $1, marry_request = NULL WHERE id = $2', [req, m.sender])
+await m.db.query('UPDATE usuarios SET marry = $1 WHERE id = $2', [m.sender, req])
+await conn.reply(m.chat, `✅ ¡Felicidades! 🥳\n@${req.split('@')[0]} y @${m.sender.split('@')[0]} ahora están casados`, m, { mentions: [req, m.sender] })
 } else if (response === 'rechazar') {
-delete global.db.data.users[requesterId].marryRequest;
-delete global.db.data.users[targetId].marryRequest;
-m.reply(`⚠️ Has rechazado la solicitud de matrimonio de @${requesterId.split('@')[0]} (${global.db.data.users[requesterId].name}).`, null, { mentions: [requesterId, targetId] });
-}};
-handler.help = ['marry @tag', 'pareja']
+await m.db.query('UPDATE usuarios SET marry_request = NULL WHERE id = $1', [m.sender])
+await conn.reply(m.chat, `⚠️ Has rechazado la solicitud de matrimonio de @${req.split('@')[0]}`, m, { mentions: [req] })
+}}
+handler.help = ['marry @tag']
 handler.tags = ['econ']
-handler.command = ['marry', 'pareja'];
-handler.register = true;
+handler.command = ['marry', 'pareja']
+handler.register = true
 
-export default handler;
+export default handler

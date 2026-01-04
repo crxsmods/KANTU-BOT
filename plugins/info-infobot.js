@@ -1,125 +1,140 @@
-import db from '../lib/database.js';
-import ws from 'ws';
-import { cpus as _cpus, totalmem, freemem, platform, hostname, version, release, arch } from 'os';
-import os from 'os';
-import moment from 'moment';
-import speed from 'performance-now';
-import { sizeFormatter } from 'human-readable';
+import { db, getSubbotConfig } from '../lib/postgres.js'
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
+import ws from 'ws'
+import speed from 'performance-now'
+import { sizeFormatter } from 'human-readable'
 
-let format = sizeFormatter({std: 'JEDEC', decimalPlaces: 2, keepTrailingZeroes: false, render: (literal, symbol) => `${literal} ${symbol}B`,});
+const format = sizeFormatter({
+  std: 'JEDEC',
+  decimalPlaces: 2,
+  keepTrailingZeroes: false,
+  render: (literal, symbol) => `${literal} ${symbol}B`
+})
 
-const used = process.memoryUsage();
-
-async function getSystemInfo() {
-    let cpuInfo = os.cpus();
-    let modeloCPU = cpuInfo && cpuInfo.length > 0 ? cpuInfo[0].model : 'Modelo de CPU no disponible';
-    let espacioTotalDisco = 'Información no disponible';
-
-    const data = {
-        latencia: 'No disponible',
-        plataforma: os.platform(),
-        núcleosCPU: cpuInfo ? cpuInfo.length : 'No disponible',
-        modeloCPU: modeloCPU,
-        arquitecturaSistema: os.arch(),
-        versiónSistema: os.release(),
-        procesosActivos: os.loadavg()[0],
-        porcentajeCPUUsada: 'No disponible',
-        memory: humanFileSize(used.free, true, 1) + ' libre de ' + humanFileSize(used.total, true, 1),
-        ramUsada: 'No disponible',
-        ramTotal: 'No disponible',
-        ramLibre: 'No disponible',
-        porcentajeRAMUsada: 'No disponible',
-        espacioTotalDisco: espacioTotalDisco,
-        tiempoActividad: 'No disponible',
-        cargaPromedio: os.loadavg().map((avg, index) => `${index + 1} min: ${avg.toFixed(2)}.`).join('\n'),
-        horaActual: new Date().toLocaleString(),
-    };
-
-    const startTime = Date.now();
-    const endTime = Date.now();
-    data.latencia = `${endTime - startTime} ms`;
-
-    return data;
+const getCpuUsage = () => {
+  const load = os.loadavg()[0]
+  const cores = os.cpus().length
+  return ((load / cores) * 100).toFixed(2) + '%'
 }
 
-let handler = async (m, { conn, usedPrefix }) => {
-    let bot = global.db.data.settings[conn.user.jid];
-    let _uptime = process.uptime() * 1000;
-    let uptime = new Date(_uptime).toISOString().substr(11, 8);
-    let totalreg = Object.keys(global.db.data.users).length;
-    let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length;
-    let totalbots = Object.keys(global.db.data.settings).length;
-    let totalStats = Object.values(global.db.data.stats).reduce((total, stat) => total + stat.total, 0);
-    const chats = Object.entries(conn.chats).filter(([id, data]) => id && data.isChats);
-    let totalchats = Object.keys(global.db.data.chats).length;
-    let totalf = Object.values(global.plugins).filter(v => v.help && v.tags).length;
-    const groupsIn = chats.filter(([id]) => id.endsWith('@g.us'));
-    let totaljadibot = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])];
-    const totalUsers = totaljadibot.length;
-    let timestamp = speed();
-    let latensi = speed() - timestamp;
-    const { restrict } = global.db.data.settings[conn.user.jid] || {}
-    const { autoread } = global.opts    
+const getFolderSize = (folderPath) => {
+  let totalSize = 0
+  function calculateSize(directory) {
+    const files = fs.readdirSync(directory)
+    for (const file of files) {
+      const filePath = path.join(directory, file)
+      const stats = fs.statSync(filePath)
+      if (stats.isDirectory()) calculateSize(filePath)
+      else totalSize += stats.size
+    }
+  }
+  calculateSize(folderPath)
+  return humanFileSize(totalSize)
+}
 
-getSystemInfo().then(async (data) => {
-let teks = `*≡ INFOBOT*
+const getSystemInfo = async () => {
+  const cpuInfo = os.cpus()
+  const modeloCPU = cpuInfo[0]?.model || 'N/A'
+  const memoriaUso = process.memoryUsage()
+  const usoRam = humanFileSize(memoriaUso.rss)
+  const usoCpu = getCpuUsage()
+  return {
+    plataforma: os.platform(),
+    núcleosCPU: cpuInfo.length,
+    modeloCPU,
+    arquitecturaSistema: os.arch(),
+    versiónSistema: os.release(),
+    procesosActivos: os.loadavg()[0],
+    usoRam,
+    usoCpu,
+    tiempoActividad: toTime(os.uptime() * 1000)
+  }
+}
+
+const handler = async (m, { conn }) => {
+const start = speed();
+const subbotsCount = (global.conns || []).filter(sock => {
+const id = sock?.userId || sock?.user?.id?.split('@')[0]
+const isAlive = sock?.userId && typeof sock?.uptime === 'number'
+const mainId = conn.user?.id?.split('@')[0]?.split(':')[0]
+return isAlive && id && id !== mainId}).length
+const botId = (conn.user?.id || '').split(':')[0].replace('@s.whatsapp.net', '');
+const resGrupos = await db.query(`SELECT joined FROM chats
+  WHERE is_group = true AND bot_id = $1`, [botId]);
+const totalGrupos = resGrupos.rowCount;
+const groupsIn = resGrupos.rows.filter(row => row.joined === true);
+const gruposUnidos = groupsIn.length;
+const gruposSalidos = totalGrupos - gruposUnidos;
+const resPrivados = await db.query(`SELECT id FROM chats
+  WHERE is_group = false AND bot_id = $1`, [botId]);
+const privates = resPrivados.rowCount;
+const chatsTotales = totalGrupos + privates;
+const totalPlugins = Object.values(global.plugins).filter(p => p.help && p.tags).length;
+const latencia = speed() - start;
+const uptime = process.uptime() * 1000;
+const config = await getSubbotConfig(conn.user?.id || conn.user.jid);
+const prefijos = Array.isArray(config.prefix) ? config.prefix.join(' ') : config.prefix;
+const modo = config.mode === 'private' ? 'Private' : 'Públic';
+const [{ count: totalUsers }] = (await db.query(`SELECT COUNT(*)::int FROM usuarios`)).rows;
+const [{ count: registeredUsers }] = (await db.query(`SELECT COUNT(*)::int FROM usuarios WHERE registered = true`)).rows;
+const [{ count: totalChats }] = (await db.query(`SELECT COUNT(*)::int FROM chats`)).rows;
+const [{ total }] = (await db.query(`SELECT SUM(count)::int AS total FROM stats`)).rows;
+const comandosEjecutados = total || 0;
+const sistema = await getSystemInfo();
+
+const teks = `*≡ INFOBOT*
 
 *INFORMACIÓN*
-*▣ Grupos total:* ${groupsIn.length}
-*▣ Grupos unidos:* ${groupsIn.length}
-*▣ Grupo salidos:* ${groupsIn.length - groupsIn.length}
-*▣ Chats privado:* ${chats.length - groupsIn.length}
-*▣ Chats totales:* ${chats.length}
-*▣ Sub-Bots conectado:* ${totalUsers}
-*▣ Total plugins:* ${totalf}
-*▣ Velocidad:* ${latensi.toFixed(4)} ms
-*▣ Actividad:* ${uptime}
+*▣ Grupos total:* ${totalGrupos}
+*▣ Grupos unidos:* ${gruposUnidos}
+*▣ Grupo salidos:* ${gruposSalidos}
+*▣ Chats privado:* ${privates}
+*▣ Chats totales:* ${chatsTotales}
+*▣ Sub-Bots conectado:* ${subbotsCount}
+*▣ Total plugins:* ${totalPlugins}
+*▣ Mode:* ${modo}
+*▣ Prefix:* ${prefijos}
+*▣ Velocidad:* ${latencia.toFixed(4)} ms
+*▣ Actividad:* ${new Date(uptime).toISOString().substr(11, 8)}
 
-*▣ Comando Ejecutando:* ${toNum(totalStats)}/${totalStats}
-*▣ Grupos registrado:* ${toNum(totalchats)}/${totalchats}
-*▣ Usuarios registrado:* ${toNum(rtotalreg)} de ${toNum(totalreg)} users totales 
+*▣ Comandos ejecutados:* ${toNum(comandosEjecutados)} / ${comandosEjecutados}
+*▣ Grupos registrados:* ${toNum(totalChats)} / ${totalChats}
+*▣ Usuarios registrados:* ${toNum(registeredUsers)} de ${toNum(totalUsers)} users totales
 
 *≡ S E R V E R*
-▣ *Servidor:* ${hostname()}
-▣ *Plataforma:* ${platform()}
-▣ *Cpu:* ${data.núcleosCPU} 
-▣ *Ram usada:* ${format(totalmem() - freemem())} de ${format(totalmem())}
-▣ *Uptime:* ${toTime(os.uptime() * 1000)}`;
+▣ *Servidor:* ${os.hostname()}
+▣ *Plataforma:* ${sistema.plataforma}
+▣ *RAM usada:* ${sistema.usoRam}
+▣ *Uso de CPU:* ${sistema.usoCpu}
+▣ *Uptime:* ${sistema.tiempoActividad}`;
+await conn.sendMessage(m.chat, {text: teks, contextInfo: { mentionedJid: null, forwardingScore: 1, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363371008200788@newsletter",newsletterName: "Kantu Bot Ofc ⚡" }, externalAdReply : {mediaUrl:  [info.nna, info.nna2, info.md].getRandom(), mediaType: 2, description: null, title: `INFO - BOT`, previewType: 0, thumbnailUrl: "https://upload.hackstorex.com/uploads/378d0128dc220b4859ce4e09d5b90a2b.jpg", sourceUrl: info.yt}}}, { quoted: m })
+};
+handler.help = ['infobot']
+handler.tags = ['main']
+handler.command = /^(infobot|informacionbot|infololi)$/i
+handler.register = true
+export default handler
 
-await conn.sendMessage(m.chat, {text: teks, contextInfo: { mentionedJid: null, forwardingScore: 1, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: '120363371008200788@newsletter', serverMessageId: '', newsletterName: 'Kantu - Bot ✨' }, externalAdReply : {mediaUrl: null, mediaType: 1, description: null, title: `INFO - BOT`, previewType: 0, thumbnailUrl: img1, sourceUrl: redes.getRandom()}}}, { quoted: m })
-//conn.sendMessage(m.chat, {image: { url: "https://telegra.ph/file/39fb047cdf23c790e0146.jpg" }, caption: teks, contextInfo: {externalAdReply: { title: `INFO - BOT`, sourceUrl: redes.getRandom(), mediaType: 1, renderLargerThumbnail: true, showAdAttribution: true, thumbnailUrl: img1}}}, { quoted: m })
-});
-}
-handler.help = ['infobot'];
-handler.tags = ['main'];
-handler.command = /^(infobot|informacionbot|infoKantu)$/i;
-handler.register = true;
-export default handler;
-
-function toNum(number) {
-    if (number >= 1000 && number < 1000000) {
-        return (number / 1000).toFixed(1) + 'k';
-    } else if (number >= 1000000) {
-        return (number / 1000000).toFixed(1) + 'M';
-    } else if (number <= -1000 && number > -1000000) {
-        return (number / 1000).toFixed(1) + 'k';
-    } else if (number <= -1000000) {
-        return (number / 1000000).toFixed(1) + 'M';
-    } else {
-        return number.toString();
-    }
+const toNum = (n) => {
+  if (!n || isNaN(n)) return '0'
+  return n >= 1_000_000 ? (n / 1_000_000).toFixed(1) + 'M' :
+         n >= 1_000 ? (n / 1_000).toFixed(1) + 'k' : n.toString()
 }
 
-function humanFileSize(bytes) {
-    const unidades = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-    const exponente = Math.floor(Math.log(bytes) / Math.log(1024));
-    return `${(bytes / Math.pow(1024, exponente)).toFixed(2)} ${unidades[exponente]}`;
+const humanFileSize = (bytes) => {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${units[i]}`
 }
 
-function toTime(milliseconds) {
-  const seconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  return `${days} d, ${hours % 24} hs, ${minutes % 60} min, ${seconds % 60} seg`;
+const toTime = (ms) => {
+  const d = Math.floor(ms / 86400000)
+  const h = Math.floor(ms / 3600000) % 24
+  const m = Math.floor(ms / 60000) % 60
+  const s = Math.floor(ms / 1000) % 60
+  return `${d}d ${h}h ${m}m ${s}s`
 }
+
+

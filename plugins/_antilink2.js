@@ -1,62 +1,50 @@
-let linkRegex = /https:/i
-export async function before(m, { isAdmin, isBotAdmin, text }) {
-  if (m.isBaileys && m.fromMe)
-    return !0
-  if (!m.isGroup) return !1
-  
-  // Asegurarse de que chat existe y tiene un valor predeterminado
-  let chat = global.db.data.chats[m.chat] || {};
-  
-  let delet = m.key.participant
-  let bang = m.key.id
-  const user = `@${m.sender.split`@`[0]}`;
-  
-  // Asegurarse de que bot tiene un valor predeterminado
-  let bot = global.db.data.settings[this.user.jid] || {};
-  
-  const isGroupLink = linkRegex.exec(m.text)
-  
-  // Comprobar si chat.antiLink2 existe antes de usarlo
-  if (chat && chat.antiLink2 && isGroupLink && !isAdmin) {
-    if (isBotAdmin) {
-      try {
-        const linkThisGroup = `https://chat.whatsapp.com/${await this.groupInviteCode(m.chat)}`
-        const linkThisGroup2 = `https://www.youtube.com/`
-        const linkThisGroup3 = `https://youtu.be/`
-        if (m.text.includes(linkThisGroup)) return !0
-        if (m.text.includes(linkThisGroup2)) return !0
-        if (m.text.includes(linkThisGroup3)) return !0
-      } catch (e) {
-        console.error('Error al obtener el código de invitación del grupo', e);
-      }
-    }    
-    
-    await conn.sendMessage(m.chat, {
-      text: `*「 ANTILINK DETECTADO 」*\n\n${user} 🤨 Rompiste las reglas del Grupo sera eliminado....`, 
-      mentions: [m.sender]
-    }, {quoted: m})
-    
-    if (!isBotAdmin) return m.reply('*Te salvarte gil, no soy admin no te puedo eliminar*')  
-    
-    if (isBotAdmin) {
-      try {
-        await conn.sendMessage(m.chat, { 
-          delete: { 
-            remoteJid: m.chat, 
-            fromMe: false, 
-            id: bang, 
-            participant: delet 
-          }
-        })
-        
-        let responseb = await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-        if (responseb[0].status === "404") return
-      } catch (e) {
-        console.error('Error al eliminar mensaje o participante', e);
-      }
-    } else if (!bot.restrict) {
-      return m.reply('*𝙀𝙡 𝙥𝙧𝙤𝙥𝙞𝙚𝙩𝙖𝙧𝙞𝙤 𝙙𝙚𝙡 𝙗𝙤𝙩 𝙣𝙤 𝙩𝙞𝙚𝙣𝙚 𝙖𝙘𝙩𝙞𝙫𝙖𝙙𝙤 𝙚𝙡 𝙧𝙚𝙨𝙩𝙧𝙞𝙘𝙘𝙞𝙤́𝙣 (𝙚𝙣𝙖𝙗𝙡𝙚 𝙧𝙚𝙨𝙩𝙧𝙞𝙘𝙩) 𝙘𝙤𝙣𝙩𝙖𝙘𝙩𝙚 𝙘𝙤𝙣 𝙚𝙡 𝙥𝙖𝙧𝙖 𝙦𝙪𝙚 𝙡𝙤𝙨 𝙝𝙖𝙗𝙞𝙡𝙞𝙩𝙚*')
-    }
-  }
-  return !0
-} 
+import { db } from '../lib/postgres.js';
+
+const linkRegex = /https?:\/\/\S+/i;
+
+export async function before(m, { conn }) {
+if (!m.isGroup || !m.originalText) return;
+const userTag = `@${m.sender.split('@')[0]}`;
+const bang = m.key.id;
+let delet = m.key.participantAlt || m.key.participant || m.sender;
+
+try {
+const res = await db.query('SELECT antilink2 FROM group_settings WHERE group_id = $1', [m.chat]);
+const config = res.rows[0];
+if (!config || !config.antilink) return;
+} catch (e) {
+console.error(e);
+return;
+}
+
+const isGroupLink = linkRegex.test(m.originalText);
+if (!isGroupLink) return;
+const metadata = await conn.groupMetadata(m.chat);
+const botId = conn.user?.id?.replace(/:\d+@/, "@");
+const isBotAdmin = metadata.participants.some(p => {
+const pid = p.id?.replace(/:\d+/, "");
+return (pid === botId || pid === (conn.user?.lid || "").replace(/:\d+/, "")) && p.admin;
+});
+
+const senderVariants = [m.sender, m.lid].filter(Boolean).map(j => j.replace(/:\d+/, ""));
+const isSenderAdmin = metadata.participants.some(p => {
+const pid = p.id?.replace(/:\d+/, "");
+return senderVariants.includes(pid) && p.admin;
+});
+
+if (isSenderAdmin || m.fromMe) return;
+if (conn.groupInviteCode) {
+try {
+const code = await conn.groupInviteCode(m.chat);
+if (m.originalText.includes(`https://chat.whatsapp.com/${code}`)) return;
+} catch {}
+}
+
+if (!isBotAdmin) return await conn.sendMessage(m.chat, { text: `*「 ANTILINK DETECTADO 」*\n\n${userTag}, enviaste un link pero no puedo eliminarte porque no soy admin.`, mentions: [m.sender]}, { quoted: m });
+await conn.sendMessage(m.chat, { text: `*「 ANTILINK DETECTADO 」*\n\n${userTag}, rompiste las reglas del grupo y serás eliminado.`, mentions: [m.sender]}, { quoted: m });
+try {
+await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: bang, participant: delet }});
+await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
+} catch (err) {
+console.error(err);
+}}

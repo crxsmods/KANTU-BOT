@@ -1,79 +1,67 @@
-/* let media = img.getRandom()
+import fs from 'fs';
+
 let handler = async (m, { conn, command }) => {
-//let pp = './src/apoyo.jpg'
-let name = await conn.getName(m.sender)
-await conn.sendMessage(m.chat, { 
-text: `*\`[ SER PREMIUM ]\`*
+let fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status@broadcast", "fromMe": false, "id": "Halo" }, "message": { "contactMessage": { "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD` }}, "participant": "0@s.whatsapp.net" }
 
-◈ 𝙃𝙤𝙡𝙖 ${name} 👋
+let pp = fs.readFileSync('./media/Menu2.jpg');
+let name = m.pushName 
 
-*𝘛𝘦 𝘢𝘨𝘳𝘢𝘥𝘦𝘻𝘤𝘰, 𝘱𝘰𝘳 𝘢𝘺𝘶𝘥𝘢𝘳𝘮𝘦 𝘺 𝘱𝘰𝘳 𝘶𝘴𝘢𝘳 𝘮𝘪 𝘣𝘰𝘵 𝘴𝘪 𝘲𝘶𝘪𝘦𝘳𝘦 𝘢𝘱𝘰𝘺𝘢𝘳 𝘢 𝘦𝘴𝘵𝘦 𝘱𝘳𝘰𝘺𝘦𝘤𝘵𝘰 𝘱𝘢𝘳𝘢 𝘲𝘶𝘦 𝘴𝘪𝘨𝘢𝘯 𝘢𝘤𝘵𝘶𝘢𝘭𝘪𝘻𝘢𝘥𝘰 𝘴𝘦𝘳 𝘭𝘰𝘴 𝘱𝘶𝘦𝘥𝘦 𝘩𝘢𝘤𝘦𝘳 𝘢𝘤𝘭𝘢𝘷𝘦 𝘥𝘦 𝘗𝘢𝘺𝘗𝘢𝘭 𝘰 𝘮𝘦𝘳𝘤𝘢𝘥𝘰 𝘱𝘢𝘨𝘰 𝘢𝘳𝘨.*
+let txt = `「 ꛕ 」 **CENTRO DE CONTRIBUCIÓN Y SOPORTE** 📈
 
- ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+Estimado(a) ${name}, el desarrollo y mantenimiento de *HackStoreX* es posible gracias al apoyo voluntario de nuestra comunidad. Si desea colaborar para mantener la estabilidad de nuestros servidores y la continuidad del proyecto, puede realizar su aporte mediante los siguientes canales oficiales. 🚀
 
-*• 𝘗𝘢𝘺𝘗𝘢𝘭 :* https://paypal.me/OfcGB
-*• 𝘔𝘦𝘳𝘤𝘢𝘥𝘰 𝘱𝘢𝘨𝘰 :*
-*• 𝘈𝘭𝘪𝘢𝘴 :* OficialGB
-*• 𝘊𝘝𝘜 :* 0000003100059201491917
+─────────────────────
 
-┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+💳 **MÉTODOS DE TRANSFERENCIA**
 
-*𝘘𝘶𝘪𝘦𝘳𝘦 𝘢𝘱𝘰𝘺𝘢𝘳 𝘥𝘦 𝘰𝘵𝘳𝘢 𝘧𝘰𝘳𝘮𝘢 𝘱𝘶𝘦𝘥𝘦 𝘥𝘰𝘯𝘢𝘳 𝘶𝘯 𝘯𝘶́𝘮𝘦𝘳𝘰 𝘱𝘢𝘳𝘢 𝘲𝘶𝘦 𝘴𝘦𝘢 𝘣𝘰𝘵, 𝘩𝘢𝘣𝘭𝘢𝘳 𝘤𝘰𝘯 𝘮𝘪 𝘤𝘳𝘦𝘢𝘥𝘰𝘳. 𝘛𝘢𝘮𝘣𝘪𝘦́𝘯 𝘱𝘶𝘦𝘥𝘦 𝘢𝘱𝘰𝘺𝘢𝘳 𝘯𝘶𝘦𝘴𝘵𝘳𝘢 𝘳𝘦𝘥𝘦𝘴 𝘴𝘰𝘤𝘪𝘢𝘭𝘦𝘴 👇*
+*🔹 PayPal (Global):*
+https://paypal.me/CrxsMods
 
-*• ʏᴏᴜᴛᴜʙᴇ | sᴜsᴄʀɪʙɪʀᴛᴇ 🔕*
-${yt}
+*🔹 Transferencia Interbancaria (México):*
+• *Banco:* STP
+• *CLABE:* 728969000077556515
+• *Concepto:* Soporte
+• *Beneficiario:* [Tu Nombre / Crxs]
 
-*• ɢɪᴛʜᴜʙ 🌟*
-${md}
+*🔹 Depósito en Efectivo (OXXO):*
+• *Referencia:* 2242 1704 2064 4281
 
-*• ¡ᴇɴʟᴀᴄᴇ ᴏғɪᴄɪᴀʟᴇs ᴇɴ ᴜ́ɴɪᴄᴏ ʟᴜɢᴀʀ! 👇*
-https://atom.bio/lolibot
+─────────────────────
 
-*• ғᴀᴄᴇʙᴏᴏᴋ*
-${face}
+📂 *OTRAS FORMAS DE COLABORAR*
 
- ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+Si desea apoyar de otra manera puede hacerlo Recomendando Nuestro Host "SwalloX" ( dash.swallox.com ) y nosostros te daremos servidores*GRATIS Lifetime* toda su ayuda será bienvenida. 📁
 
-*ＡＧＲＡＣＩＭＩＥＮＴＯＳ:*
+*🎬 Plataforma Educativa (YouTube):*
+${info.yt}
 
-*ʟᴏʟɪʙᴏᴛ-ᴍᴅ ᴛɪᴇɴᴇ ғᴜɴᴄɪᴏɴᴇs ǫᴜᴇ ᴘᴇʀᴛᴇɴᴇᴢᴄᴀɴ ᴀ ʟᴀs sɪɢᴜᴇɴᴛᴇs ᴇᴍᴘʀᴇsᴀs ᴏʀɢᴀɴɪᴢᴀᴄɪᴏɴ(ᴇs) ᴘᴇʀsᴏɴᴀ(s):*
+*⭐ Repositorio Oficial (GitHub):*
+${info.md}
 
-*• ᴛʜᴇ-ᴍʏｓᴛɪᴄʙᴏᴛ-ᴍᴅ:*
-https://github.com/BrunoSobrino
+*🔗 Portal Web:*
+https://HackStoreX.com
 
-*• ɢᴀᴛᴀʙᴏᴛ-ᴍᴅ:*
-https://github.com/GataNina-Li`, 
-contextInfo:{
+> Su contribución garantiza que este servicio siga siendo accesible para todos. Agradecemos su generosidad. ⚙️`
+
+await conn.sendFile(m.chat, pp, 'error.jpg', txt, fkontak, null, { contextInfo: {
 forwardingScore: 9999999,
 isForwarded: true, 
 mentionedJid:[m.sender],
-"externalAdReply": {
-"showAdAttribution": true,
-"renderLargerThumbnail": true,
-"thumbnail": imagen3, 
-"title": 'ᴾᵘᵉᵈᵉ ᵃᵖᵒʸᵃʳ ⁿᵘᵉˢᵗʳᵒ ʳᵉᵖᵒˢᶦᵗᵒʳᶦᵒ ᶜᵒⁿ ᵘⁿᵃ ᵉˢᵗʳᵉˡˡᶦᵗᵃˢ ⭐', 
-"containsAutoReply": true,
-"mediaType": 1, 
-"mediaUrl": md, 
-"sourceUrl": md, 
-}}}, { quoted: m })
-// await conn.sendButton(m.chat, `a`, `https://paypal.me/OficialGD`, pp, [['𝙑𝙤𝙡𝙫𝙚𝙧 𝙖𝙡 𝙈𝙚𝙣𝙪́ ☘️', `/menu`]], m) //[['𝙑𝙤𝙡𝙫𝙚𝙧 𝙖𝙡 𝙈𝙚𝙣𝙪́ ☘️', `/menu`]]
-/*await conn.sendHydrated(m.chat, str, wm, media, 'https://github.com/elrebelde21/The-LoliBot-MD', 'ɢɪᴛʜᴜʙ', null, null, [
-['𝙂𝙧𝙪𝙥𝙤𝙨 𝙊𝙛𝙞𝙘𝙞𝙖𝙡𝙚𝙨 🔰', '.grupos'],
-['𝘾𝙧𝙚𝙖𝙙𝙤𝙧 💗', '#owner'],
-['𝙑𝙤𝙡𝙫𝙚𝙧 𝙖𝙡 𝙈𝙚𝙣𝙪́ ☘️', '/menu']
-], m,)}*/
-/* 
+externalAdReply: {
+showAdAttribution: false,
+renderLargerThumbnail: false,
+title: '「 ꛕ 」 ᴾᵘᵉᵈᵉ ᵃᵖᵒʸᵃʳ ⁿᵘᵉˢᵗʳᵒ ʳᵉᵖᵒˢᶦᵗᵒʳᶦᵒ ᶜᵒⁿ ᵉˢᵗʳᵉˡˡᶦᵗᵃˢ', 
+body: 'HackStoreX.com',
+mediaType: 2, 
+thumbnailUrl: m.pp, 
+mediaUrl: info.md, 
+sourceUrl: info.md, 
+}}});
 }
+
 handler.help = ['donar']
 handler.tags = ['main']
-handler.command = /^dona(te|si)|donar|apoyar|paypal|donating|creditos$/i
-handler.exp = 600
+handler.command = /^dona(te|si)|donar|apoyar|paypal|donating|comprar|host|Swallox|swallox|comprarhost|creditos$/i
 handler.register = true
-export default handler
 
- 
-/*
-//await conn.sendButton(m.chat, wm, `https://paypal.me/OficialGD`, pp, m)
-await conn.sendButton(m.chat, ``, `https://paypal.me/OficialGD`, pp, [['𝙑𝙤𝙡𝙫𝙚𝙧 𝙖𝙡 𝙈𝙚𝙣𝙪́ ☘️', `/menu`]], m) //[['𝙑𝙤𝙡𝙫𝙚𝙧 𝙖𝙡 𝙈𝙚𝙣𝙪́ ☘️', `/menu`]]
-  */
+export default handler

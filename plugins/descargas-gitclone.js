@@ -1,25 +1,72 @@
-import fetch from 'node-fetch'
-const regex = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i
-let handler = async (m, { args, usedPrefix, command }) => {
-if (!args[0]) return conn.reply(m.chat, `⚠️*𝙄𝙣𝙜𝙧𝙚𝙨𝙚 𝙪𝙣 𝙚𝙣𝙡𝙖𝙘𝙚 𝙙𝙚 𝙂𝙞𝙩𝙝𝙪𝙗*\n• *𝙀𝙟 :* ${usedPrefix + command} ${md}`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: mg, body: ' 💫 𝐒𝐮𝐩𝐞𝐫 𝐁𝐨𝐭 𝐃𝐞 𝐖𝐡𝐚𝐭𝐬𝐚𝐩𝐩 🥳 ', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})    
-if (!regex.test(args[0])) return conn.reply(m.chat, `⚠️ 𝙚𝙨𝙤 𝙣𝙤 𝙚𝙨 𝙪𝙣 𝙚𝙣𝙡𝙖𝙘𝙚 𝙙𝙚 𝙜𝙞𝙩𝙝𝙪𝙗 𝙗𝙤𝙡𝙪𝙙𝙤 🤡`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: iig, body: ' 💫 𝐒𝐮𝐩𝐞𝐫 𝐁𝐨𝐭 𝐃𝐞 𝐖𝐡𝐚𝐭𝐬𝐚𝐩𝐩 🥳 ', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})
-try {   
-let [_, user, repo] = args[0].match(regex) || []
-repo = repo.replace(/.git$/, '')
-let url = `https://api.github.com/repos/${user}/${repo}/zipball`
-let filename = (await fetch(url, { method: 'HEAD' })).headers.get('content-disposition').match(/attachment; filename=(.*)/)[1]
-conn.reply(m.chat, `*⌛ 𝐂𝐚𝐥𝐦𝐚 ✋ 𝐂𝐥𝐚𝐜𝐤, 𝐘𝐚 𝐞𝐬𝐭𝐨𝐲 𝐄𝐧𝐯𝐢𝐚𝐝𝐨 𝐞𝐥 𝐚𝐫𝐜𝐡𝐢𝐯𝐨 🚀*\n*𝐒𝐢 𝐧𝐨 𝐥𝐞 𝐥𝐥𝐞𝐠𝐚 𝐞𝐥 𝐚𝐫𝐜𝐡𝐢𝐯𝐨 𝐞𝐬 𝐝𝐞𝐛𝐢𝐝𝐨 𝐚 𝐪𝐮𝐞 𝐞𝐥 𝐑𝐞𝐩𝐨𝐬𝐢𝐭𝐨𝐫𝐢𝐨 𝐞𝐬 𝐦𝐮𝐲 𝐩𝐞𝐬𝐚𝐝𝐨*`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: wm, body: ' 💫 𝐒𝐮𝐩𝐞𝐫 𝐁𝐨𝐭 𝐃𝐞 𝐖𝐡𝐚𝐭𝐬𝐚𝐩𝐩 🥳 ', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})   
-conn.sendFile(m.chat, url, filename, null, m, null, fake)
-handler.limit = 2
-} catch (e) { 
-m.reply(`\`\`\`⚠️ OCURRIO UN ERROR ⚠️\`\`\`\n\n> *Reporta el siguiente error a mi creador con el comando:*#report\n\n>>> ${e} <<<< `)       
-console.log(e) 
-handler.limit = 0 //❌No gastada diamante si el comando falla
-}}
-handler.help = ['gitclone <url>']
-handler.tags = ['downloader']
-handler.command = /gitclone|clonarepo|clonarrepo|repoclonar/i
-handler.register = true
-//handler.limit = 2
-handler.level = 2
-export default handler
+import fetch from 'node-fetch';
+const regex = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
+const userCaptions = new Map();
+const userRequests = {};
+
+let handler = async (m, { args, usedPrefix, command, conn }) => {
+    // 1. Mensaje de uso correcto
+    const usage = `「📦」 *CLONADOR DE REPOSITORIOS*\n\n` +
+        `> _Ingrese un enlace de GitHub para descargar el código fuente en formato .zip_\n\n` +
+        `📌 *EJEMPLO:* \n` +
+        `↳ ${usedPrefix + command} https://github.com/usuario/repositorio`;
+
+    if (!args[0]) throw usage;
+    
+    // 2. Validación de enlace profesional
+    if (!regex.test(args[0])) return m.reply(`「⚠️」 *Enlace Inválido*\n\nEl link proporcionado no pertenece a un repositorio de GitHub válido.`);
+
+    // 3. Control de spam/solicitudes
+    if (userRequests[m.sender]) {
+        return conn.reply(m.chat, `「⏳」 *Solicitud en curso*\n\n@${m.sender.split('@')[0]}, ya estoy procesando una descarga para ti. Por favor, espera a que finalice.`, userCaptions.get(m.sender) || m, { mentions: [m.sender] });
+    }
+
+    userRequests[m.sender] = true;
+
+    try {   
+        // 4. Mensaje de preparación (ExternalAdReply)
+        const downloadGit = await conn.reply(m.chat, `「📂」 *PREPARANDO ARCHIVO*\n\n> _Estamos comprimiendo el repositorio. Si el archivo es demasiado pesado, el envío podría fallar._`, m, {
+            contextInfo: { 
+                externalAdReply: { 
+                    mediaUrl: null, 
+                    mediaType: 1, 
+                    description: null, 
+                    title: 'GITHUB DOWNLOADER', 
+                    body: 'Repositorio de Software vía WhatsApp', 
+                    previewType: 0, 
+                    thumbnail: m.pp, 
+                    sourceUrl: args[0]
+                }
+            }
+        });   
+
+        userCaptions.set(m.sender, downloadGit);
+        
+        let [_, user, repo] = args[0].match(regex) || [];
+        repo = repo.replace(/.git$/, '');
+        let url = `https://api.github.com/repos/${user}/${repo}/zipball`;
+        
+        // Obtener nombre del archivo desde la cabecera
+        let response = await fetch(url, { method: 'HEAD' });
+        let filename = response.headers.get('content-disposition').match(/attachment; filename=(.*)/)[1];
+
+        // Envío del archivo
+        await conn.sendFile(m.chat, url, filename, null, m);
+
+    } catch (e) { 
+        // 5. Mensaje de error técnico
+        m.reply(`「❌」 *ERROR DEL SISTEMA*\n\nNo se pudo obtener el repositorio. Es posible que sea privado o que el enlace sea incorrecto.\n\n> *Detalle:* ${e.message}`);       
+        console.log(e);
+        handler.limit = 0; 
+    } finally {
+        delete userRequests[m.sender];
+    }
+};
+
+handler.help = ['gitclone <url>'];
+handler.tags = ['downloader'];
+handler.command = /gitclone|clonarepo|clonarrepo|repoclonar/i;
+handler.register = true;
+handler.limit = 2;
+handler.level = 1;
+
+export default handler;

@@ -1,31 +1,33 @@
-const handler = async (m, {conn, usedPrefix, text}) => {
-if (isNaN(text) && !text.match(/@/g)) {
-} else if (isNaN(text)) {
-var number = text.split`@`[1];
-} else if (!isNaN(text)) {
-var number = text;
-}
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+    // Definimos quién es el usuario objetivo (Prioridad: Mención > Respuesta > Texto)
+    let who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text ? text.replace(/[^0-9]/g, '') + '@s.whatsapp.net' : false;
 
-if (!text && !m.quoted) return conn.reply(m.chat, `*⚠️ ¿A quien le doy admins?* Etiqueta a una persona no soy adivino :)`, m);
-if (number.length > 13 || (number.length < 11 && number.length > 0)) return conn.reply(m.chat, `*⚠️ Estas drogado ese número ingresado es incorrecto 🤓*, ingresar un número correcto o mejor etiquetas al usuario @tag`, m);
-try {
-if (text) {
-var user = number + '@s.whatsapp.net';
-} else if (m.quoted.sender) {
-var user = m.quoted.sender;
-} else if (m.mentionedJid) {
-var user = number + '@s.whatsapp.net';
-}} catch (e) {
-} finally {
-conn.groupParticipantsUpdate(m.chat, [user], 'promote');
-conn.reply(m.chat, `*[ ✅ ] ÓRDENES RECIBIDAS*`, m);
-}};
-handler.help = ['*593xxx*', '*@usuario*', '*responder chat*'].map((v) => 'promote ' + v);
+    // 1. Si no se detecta a quién remover privilegios
+    if (!who) return conn.reply(m.chat, `「 ꛕ 」 Es necesario mencionar a un usuario o responder a su mensaje para realizar esta acción. 👤`, m);
+
+    // 2. Validación de longitud
+    let userNumber = who.split('@')[0];
+    if (userNumber.length < 8 || userNumber.length > 15) return conn.reply(m.chat, `「 ꛕ 」 El identificador ingresado no es válido. Por favor, verifica el número o etiqueta a un usuario activo. 📑`, m);
+
+    try {
+        // Ejecución del comando
+        await conn.groupParticipantsUpdate(m.chat, [who], 'demote');
+        
+        // Mensaje de éxito profesional
+        conn.reply(m.chat, `「 ꛕ 」 Privilegios de administrador removidos correctamente. ⚖️`, m);
+        
+    } catch (e) {
+        // En caso de que el usuario no sea admin o haya ocurrido un error
+        conn.reply(m.chat, `「 ꛕ 」 No se pudo completar la operación. Verifica que el usuario tenga un rango asignado. ⚠️`, m);
+    }
+};
+
+handler.help = ['demote'].map((v) => v + ' *@tag*');
 handler.tags = ['group'];
-handler.command = /^(promote|daradmin|darpoder)$/i;
+handler.command = /^(demote|quitaradmin|quitarpoder)$/i;
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;
-handler.fail = null;
-handler.register = true 
+handler.register = true;
+
 export default handler;

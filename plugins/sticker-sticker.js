@@ -2,20 +2,21 @@ import { sticker } from '../lib/sticker.js'
 import uploadFile from '../lib/uploadFile.js'
 import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
+import { db } from '../lib/postgres.js';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-let user = global.db.data.users[m.sender]
-let stiker = false
-let stick = args.join(" ").split("|");
-let f = user.packname || global.packname
-let g = (user.packname && user.author ? user.author : (user.packname && !user.author ? '' : global.author))
+const userResult = await db.query('SELECT sticker_packname, sticker_author FROM usuarios WHERE id = $1', [m.sender]);
+const user = userResult.rows[0] || {};
+let stiker = false;
+let f = user.sticker_packname || global.info.packname;
+let g = (user.sticker_packname && user.sticker_author ? user.sticker_author : (user.sticker_packname && !user.sticker_author ? '' : global.info.author));
 try {
 let q = m.quoted ? m.quoted : m
 let mime = (q.msg || q).mimetype || q.mediaType || ''
 if (/webp|image|video/g.test(mime)) {
-if (/video/g.test(mime)) if ((q.msg || q).seconds > 18) return m.reply('⚠️ ¿Dónde has visto un sticker de 15 segundos, pendejo? Haz el video más corto, con un máximo de 12 segundos.')
+if (/video/g.test(mime)) if ((q.msg || q).seconds > 18) return m.reply('⚠️ ¿Dónde has visto un sticker de 15 segundos? Haz el video más corto, con un máximo de 12 segundos.')
 let img = await q.download?.()
-if (!img) return m.reply(`*Y la imagen? 🤔 Responde a una imagen para hacer el sticker. Usa:* ${usedPrefix + command}`) 
+if (!img) return m.reply(`🫵 Responde a un video o imagen*\n> *Usa:* ${usedPrefix + command}`) 
 let out
 try {
 stiker = await sticker(img, false, f, g)
@@ -36,8 +37,8 @@ else return m.reply('URL invalido')
 console.error(e)
 if (!stiker) stiker = e
 } finally {
-if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: wm, body: ``, mediaType: 2, sourceUrl: [nna, nn, md, yt].getRandom(), thumbnail: imagen4}}}, { quoted: m })
-else return m.reply(`*🫵 Responde a un video o imagen*\n> *Usa:* ${usedPrefix + command}`) 
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: info.wm, body: ``, mediaType: 2, sourceUrl: [info.nna, info.nna2, info.md, info.yt].getRandom(), thumbnail: m.pp}}}, { quoted: m })
+else return m.reply(`🫵 Responde a un video o imagen*\n> *Usa:*  ${usedPrefix + command}`) 
 }}
 handler.help = ['sticker']
 handler.tags = ['sticker']

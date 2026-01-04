@@ -1,5 +1,5 @@
-let handler = async (m, { conn, participants, usedPrefix, command, isROwner }) => {
-let kickte = `A quien eliminó? etiquetas a una persona con @tag pendejo`
+let handler = async (m, { conn, participants, usedPrefix, command, isOwner }) => {
+let kickte = `Responde el Mensaje De Alguien Para Eliminar`
 if (!m.mentionedJid[0] && !m.quoted) return m.reply(kickte, m.chat, { mentions: conn.parseMention(kickte)}) 
 let user = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted.sender
 let owr = m.chat.split`-`[0]
