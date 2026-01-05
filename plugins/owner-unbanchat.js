@@ -1,12 +1,19 @@
-let handler = async (m, { conn }) => {
-if (!(m.chat in global.db.data.chats)) return m.reply('*Este chat no está registrado en la base de datos!*')
-  let chat = global.db.data.chats[m.chat]
-  if (!chat.isBanned) return m.reply('*Este chat no está baneado!!*')
-chat.isBanned = false
-conn.reply(m.chat,  '*BOT ONLINE 🚀*', m, {contextInfo: { externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: ag, body: '𝐂𝐡𝐚𝐭 𝐝𝐞𝐬𝐛𝐚𝐧𝐞𝐚𝐝𝐨', previewType: 0, thumbnail: imagen4, sourceUrl: [md, yt, tiktok].getRandom()}}}) 
+import { db } from "../lib/postgres.js";
+
+const handler = async (m, { conn }) => {
+    await db.query(`
+      INSERT INTO group_settings (group_id, banned)
+      VALUES ($1, false)
+      ON CONFLICT (group_id) DO UPDATE SET banned = false
+    `, [m.chat]);
+
+ m.reply("? Este grupo ha sido *desbaneado*. El bot volver? a responder aqu?.");
 }
+
+handler.help = ['unbanchat'];
+handler.tags = ['owner']
 handler.command = /^unbanchat$/i
 //handler.botAdmin = true
-handler.rowner = true
+handler.owner = true
 
 export default handler

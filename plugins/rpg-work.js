@@ -1,34 +1,41 @@
-const handler = async (m, {conn, isPrems}) => {
-const hasil = Math.floor(Math.random() * 5000);
-const time = global.db.data.users[m.sender].lastwork + 600000;
-if (new Date - global.db.data.users[m.sender].lastwork < 600000) return conn.reply(m.chat, `*ᴇsᴛᴀ ᴄᴀɴsᴀᴅᴏ, ᴅᴇʙᴇs ᴅᴇsᴄᴀɴsᴀʀ ᴄᴏᴍᴏ ᴍɪɴɪᴍᴏ ${msToTime(time - new Date())} ᴘᴀʀᴀ ᴠᴏʟᴠᴇʀ ᴀ ᴛʀᴀʙᴀᴊᴀʀ!*`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: wm, body: '', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})
-m.reply(`🛠 ${pickRandom(global.work)} ${hasil} XP`) 
-global.db.data.users[m.sender].exp += hasil;
-global.db.data.users[m.sender].lastwork = new Date() * 1;
+const handler = async (m, { conn }) => {
+const cooldown = 600_000; //10 min
+const now = Date.now();
+const res = await m.db.query('SELECT exp, lastwork FROM usuarios WHERE id = $1', [m.sender]);
+const user = res.rows[0];
+const lastWork = Number(user?.lastwork) || 0;
+const remaining = Math.max(0, lastWork + cooldown - now);
+
+if (remaining > 0) return conn.reply(m.chat, `*⏳ Debes descansar ${msToTime(remaining)} antes de volver a trabajar*`, m);
+const xpGanado = Math.floor(Math.random() * 6500);
+await m.db.query(`UPDATE usuarios SET exp = exp + $1, lastwork = $2 WHERE id = $3
+  `, [xpGanado, now, m.sender]);
+await conn.reply(m.chat, `🛠 ${pickRandom(work)} *${formatNumber(xpGanado)} XP*`, m);
 };
-handler.help = ['work', 'trabaja', 'w']
-handler.tags = ['econ']
-handler.command = /^(work|trabajar|chambear|w)$/i
-handler.register = true
-export default handler
+handler.help = ['work', 'trabajar', 'w'];
+handler.tags = ['econ'];
+handler.command = /^(work|trabajar|chambear|w|chamba)$/i;
+handler.register = true;
+
+export default handler;
 
 function msToTime(duration) {
-const milliseconds = parseInt((duration % 1000) / 100);
-let seconds = Math.floor((duration / 1000) % 60);
-let minutes = Math.floor((duration / (1000 * 60)) % 60);
-let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-hours = (hours < 10) ? '0' + hours : hours;
-minutes = (minutes < 10) ? '0' + minutes : minutes;
-seconds = (seconds < 10) ? '0' + seconds : seconds;
-return minutes + ' minutos ' + seconds + ' segundos ';
+  const totalSeconds = Math.floor(duration / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes} minutos ${seconds} segundos`;
 }
 
 function pickRandom(list) {
-return list[Math.floor(list.length * Math.random())];
+  return list[Math.floor(Math.random() * list.length)];
 }
 
-global.work = ['Eres un maestro alquimista, destilando misteriosas pociones en busca de secretos perdidos. obtiene: ', 'Violarte al que dijo que los bots se crean con termux obtienes:', 
-  'Te conviertes en un intrépido cazador de tesoros, explorando lugares olvidados en busca de riquezas escondidas. obtiene:', "cuidarte el grupos del Kantubot ganar", "Ayudas a moderar el grupo de GataBot por", "Ayudas a moderar el grupo de KantuBot por", "Ayudas a moderar el grupo de The-Shadow-Brokers-Bot por", "Trabaja para una empresa militar privada, ganando", "Organiza un evento de cata de vinos y obtiene",
+function formatNumber(num) {
+  return num.toLocaleString('en').replace(/,/g, '.'); 
+}
+
+const work = ['Eres un maestro alquimista, destilando misteriosas pociones en busca de secretos perdidos. obtiene: ', 'Violarte al que dijo que los bots se crean con termux obtienes:', 
+  'Te conviertes en un intrépido cazador de tesoros, explorando lugares olvidados en busca de riquezas escondidas. obtiene:', "cuidarte el grupos del KantuBot ganar", "Ayudas a moderar el grupo de SwalloX por", "Ayudas a moderar el grupo de KantuBot por", "Ayudas a moderar el grupo de Swallox por", "Trabaja para una empresa militar privada, ganando", "Organiza un evento de cata de vinos y obtiene",
   'Diriges un negocio de transmutación de metales, convirtiendo lo común en valiosos tesoros. obtiene:',
   'Exploras antiguas ruinas y encuentras una reliquia valiosa que te otorga conocimientos ancestrales. obtiene:',
   'Trabajas como mercenario en una guerra épica, enfrentándote a desafíos con tu habilidad y coraje. obtiene:',

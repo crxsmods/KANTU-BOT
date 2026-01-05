@@ -28,12 +28,12 @@ await conn.reply(m.chat, errorMessage, m);
 } catch (error) {
 console.error(error);
 if (error.message) {
-const errorMessage2 = `\n${fg}` + error.message;
+const errorMessage2 = `\n⚠️ ` + error.message;
 }
-await m.reply(`${fg}`) 
+await m.reply(`⚠️ Editaste desde el server, reinstale`) 
 }}};
 handler.help = ['update']
 handler.tags = ['owner']
 handler.command = /^(update|actualizar|gitpull)$/i;
-handler.rowner = true;
+handler.owner = true;
 export default handler;

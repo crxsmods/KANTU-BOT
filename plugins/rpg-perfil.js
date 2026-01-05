@@ -1,63 +1,61 @@
-import db from '../lib/database.js'
-import { canLevelUp, xpRange } from '../lib/levelling.js'
 import { createHash } from 'crypto'
-import PhoneNumber from 'awesome-phonenumber'
 import fetch from 'node-fetch'
-import fs from 'fs'
+import moment from 'moment-timezone'
+import { xpRange } from '../lib/levelling.js'
 
-let handler = async (m, { conn, usedPrefix, command}) => {
-let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
-let bio = await conn.fetchStatus(who).catch(_ => 'undefined')
-let biot = bio.status?.toString() || 'Sin Info'
-let user = global.db.data.users[who]
-let pp = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://telegra.ph/file/9d38415096b6c46bf03f8.jpg')
-let { exp, limit, name, registered, regTime, age, level } = global.db.data.users[who]
-let { min, xp, max } = xpRange(user.level, global.multiplier)
-let username = conn.getName(who)
-let prem = global.prems.includes(who.split`@`[0])
-let sn = createHash('md5').update(who).digest('hex')
-let api = await axios.get(`${apis}/tools/country?text=${PhoneNumber('+' + who.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-let userNationalityData = api.data.result
-let userNationality = userNationalityData ? `${userNationalityData.name} ${userNationalityData.emoji}` : 'Desconocido'
-let img = await (await fetch(`${pp}`)).buffer()
-  
-let str = ` *「 PERFIL 」*
+const formatPhoneNumber = (jid) => {
+  if (!jid) return 'Desconocido';
+  const number = jid.replace('@s.whatsapp.net', '');
+  if (!/^\d{8,15}$/.test(number)) return 'Desconocido';
+  return `+${number}`;
+};
+
+let handler = async (m, { conn }) => {
+let who = m.mentionedJid?.[0] || (m.fromMe ? conn.user?.jid : m.sender)
+
+const userResult = await m.db.query('SELECT * FROM usuarios WHERE id = $1', [who])
+const user = userResult.rows[0]
+const bio = await conn.fetchStatus(who).catch(() => ({}))
+const biot = bio.status || 'Sin Info'
+const profilePic = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://upload.hackstorex.com/uploads/48556dd20450f265ab6a3587aadcc198.jpg')
+const buffer = await (await fetch(profilePic)).buffer()
+const { exp, limite, nombre, registered, edad, level, marry, gender, birthday } = user
+const { min, xp, max } = xpRange(level, global.multiplier || 1)
+const sn = createHash('md5').update(String(who)).digest('hex')
+const phone = formatPhoneNumber(who)
+
+let nacionalidad = 'Desconocida'
+try {
+const response = await fetch(`${info.apis}/tools/country?text=${phone}`)
+const data = await response.json()
+if (data?.result?.name) nacionalidad = `${data.result.name} ${data.result.emoji}`
+} catch (_) {}
+
+let relacion = '❌ *No estás en ninguna relación, solter@ 🤑.*'
+if (marry) {
+const parejaRes = await m.db.query('SELECT nombre FROM usuarios WHERE id = $1', [marry])
+const nombrePareja = parejaRes.rows[0]?.nombre || 'Desconocido'
+relacion = `💍 *Está en una relación con:* ${nombrePareja}`
+}
  
-👤 *Nombre :* ${name}
-☎️ *Número :* ${PhoneNumber('+' + who.replace('@s.whatsapp.net', '')).getNumber('international')}
-🌐 *Link :* wa.me/${who.split`@`[0]}
-🌎 *Nacionalidad :* ${userNationality}
-💎 *Limite :* ${limit} 
-⚙️ *Nivel :* ${level}
-◯ *Registrado :* ${registered ? 'Si': 'No'}
+const texto = `*「 PERFIL 」*
+
+👤 *Nombre:* ${nombre}
+☎️ *Número:* ${phone}
+🌐 *Link:* wa.me/${who.split('@')[0]}
+🌍 *Nacionalidad:* ${nacionalidad} ${edad ? `\n🎈 *Edad:* ${edad}` : ''} ${gender ? `\n⚧️ *Género:* ${gender}` : ''} ${birthday ? `\n🎂 *Cumpleaños:* ${moment(birthday).format('DD/MM/YYYY')}` : ''}
+💎 *Límite:* ${limite ?? 0}
+⚙️ *Nivel:* ${level}
+◯ *Registrado:* ${registered ? 'Sí' : 'No'}
+
+${relacion}
 
 *•━━━━⪻ 𝙿𝙴𝚁𝙵𝙸𝙻 ⪼━━━━•*`
-let mentionedJid = [who]
-await conn.sendFile(m.chat, img, 'lp.jpg', str, m, false, { contextInfo: {forwardingScore: 9999999, isForwarded: true, mentionedJid, externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: wm, body: '𝐒𝐮𝐩𝐞𝐫 𝐁𝐨𝐭 𝐃𝐞 𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩', previewType: 0, thumbnail: imagen4, sourceUrl: [md, yt, tiktok].getRandom()}}})
-//conn.sendFile(m.chat, img, 'thumbnail.jpg', text, m)
+await conn.sendFile(m.chat, buffer, 'perfil.jpg', texto, m)
 }
 handler.help = ['perfil', 'perfil *@user*']
 handler.tags = ['rg']
 handler.command = /^(perfil|profile)$/i
 handler.register = true
+
 export default handler
-
-const more = String.fromCharCode(8206)
-const readMore = more.repeat(4001)
-
-function formatDate(n, locale = 'es-US') {
-let d = new Date(n)
-return d.toLocaleDateString(locale, {weekday: 'long',
-day: 'numeric',
-month: 'long',
-year: 'numeric'
-})}
-
-function formatHour(n, locale = 'en-US') {
-let d = new Date(n)
-return d.toLocaleString(locale, {
-hour: 'numeric',
-minute: 'numeric',
-second: 'numeric',
-hour12: true
-})}

@@ -6,8 +6,8 @@ var number = text.split`@`[1];
 var number = text;
 }
 
-if (!text && !m.quoted) return conn.reply(m.chat, `*⚠️ ¿A quien le quitó admins?* etiquetas a una persona no soy adivinó :)`, m);
-if (number.length > 13 || (number.length < 11 && number.length > 0)) return conn.reply(m.chat, `*Esta drogado o que ese número ingresado es incorrecto 🤓*, ingresa el número correctamente o mejor etiquetas al usuario.`, m);
+if (!text && !m.quoted) return conn.reply(m.chat, `「 ꛕ 」 Es necesario mencionar a un usuario o responder a su mensaje para realizar esta acción. 👤`, m);
+if (number.length > 13 || (number.length < 11 && number.length > 0)) return conn.reply(m.chat, `*Ingresa el número correctamente o mejor etiquetas al usuario.`, m);
 try {
 if (text) {
 var user = number + '@s.whatsapp.net';

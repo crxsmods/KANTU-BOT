@@ -1,584 +1,529 @@
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-import './config.js' 
-import { createRequire } from 'module'
-import path, { join } from 'path'
-import {fileURLToPath, pathToFileURL} from 'url'
-import { platform } from 'process'
-import * as ws from 'ws'
-import fs, { watchFile, unwatchFile, writeFileSync, readdirSync, statSync, unlinkSync, existsSync, readFileSync, copyFileSync, watch, rmSync, readdir, stat, mkdirSync, rename } from 'fs';
-import { promises as fsPromises } from 'fs';
-import yargs from 'yargs'
-import { spawn } from 'child_process'
-import lodash from 'lodash'
-import chalk from 'chalk'
-import syntaxerror from 'syntax-error'
-import { format } from 'util'
-import pino from 'pino'
-import Pino from 'pino'
-import { Boom } from '@hapi/boom'
-import { makeWASocket, protoType, serialize } from './lib/simple.js'
-import {Low, JSONFile} from 'lowdb'
-import PQueue from 'p-queue'
-import store from './lib/store.js'
-import readline from 'readline'
-import NodeCache from 'node-cache' 
-import { startSubBots } from './plugins/jadibot.js';
-import pkg from 'google-libphonenumber'
-const { PhoneNumberUtil } = pkg
-const phoneUtil = PhoneNumberUtil.getInstance()
-const { makeInMemoryStore, DisconnectReason, useMultiFileAuthState, MessageRetryMap, fetchLatestBaileysVersion, makeCacheableSignalKeyStore } = await import('@whiskeysockets/baileys')
-const { CONNECTING } = ws
-const { chain } = lodash
-const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
-protoType()
-serialize()
-global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== 'win32') {
-  return rmPrefix ? /file:\/\/\//.test(pathURL) ? fileURLToPath(pathURL) : pathURL : pathToFileURL(pathURL).toString();
-}; global.__dirname = function dirname(pathURL) {
-  return path.dirname(global.__filename(pathURL, true));
-}; global.__require = function require(dir = import.meta.url) {
-  return createRequire(dir);
+// Creador CrxsMods
+// Https://Github.com/CrxsMods 
+// https://t.me/CrxsMods 
+// 🚨 DO NOT EDIT  - NO EDITAR 🚨
+import * as baileys from "@whiskeysockets/baileys";
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
+import readlineSync from "readline-sync";
+import pino from "pino";
+import NodeCache from 'node-cache';
+import { startSubBot } from "./lib/subbot.js";
+import "./config.js";
+import { handler, callUpdate, participantsUpdate, groupsUpdate } from "./handler.js";
+import { loadPlugins } from './lib/plugins.js';
+const getWidth = () => Math.min(process.stdout.columns || 45, 65) - 4;
+const isMobile = () => (process.stdout.columns || 45) < 55;
+
+const theme = {
+  gradient: ['#ff006e', '#8338ec', '#3a86ff'],
+  primary: '#8338ec',
+  secondary: '#ff006e', 
+  accent: '#3a86ff',
+  success: '#00f5d4',
+  warning: '#fee440',
+  error: '#ef233c',
+  info: '#4cc9f0',
+  muted: '#6c757d',
+  gold: '#ffd700',
+  cyan: '#8be9fd',
+  green: '#50fa7b'
 };
-//global.API = (name, path = '/', query = {}, apikeyqueryname) => (name in global.APIs ? global.APIs[name] : name) + path + (query || apikeyqueryname ? '?' + new URLSearchParams(Object.entries({...query, ...(apikeyqueryname ? {[apikeyqueryname]: global.APIKeys[name in global.APIs ? global.APIs[name] : name]} : {})})) : '')
-global.timestamp = { start: new Date }
-const __dirname = global.__dirname(import.meta.url);
-//const __dirname = join(fileURLToPath(import.meta.url), '..');
-global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-//global.prefix = new RegExp('^[' + (opts['prefix'] || '*/i!#$%+£¢€¥^°=¶∆×÷π√✓©®&.\\-.@').replace(/[|\\{}()[\]^$+*.\-\^]/g, '\\$&') + ']')
-
-//news
-const databasePath = path.join(__dirname, 'database');
-if (!fs.existsSync(databasePath)) fs.mkdirSync(databasePath);
-
-const paths = {
-users: path.join(databasePath, 'users'),
-chats: path.join(databasePath, 'chats'),
-settings: path.join(databasePath, 'settings'),
-msgs: path.join(databasePath, 'msgs'),
-sticker: path.join(databasePath, 'sticker'),
-stats: path.join(databasePath, 'stats'),
+//  SISTEMA DE LOGGING
+const getTimestamp = () => {
+  const now = new Date();
+  return chalk.hex(theme.muted)(`[${now.toLocaleTimeString('es-MX', { hour12: false })}]`);
 };
 
-Object.values(paths).forEach(dir => {
-if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-});
-
-const queue = new PQueue({ concurrency: 5 });
-
-global.db = {
-data: {
-users: {},
-chats: {},
-settings: {},
-msgs: {},
-sticker: {},
-stats: {},
-},
+const log = {
+  success: (msg) => console.log(`  ${chalk.hex(theme.success)('✔')} ${chalk.white(msg)}`),
+  error: (msg) => console.log(`  ${chalk.hex(theme.error)('✖')} ${chalk.white(msg)}`),
+  warn: (msg) => console.log(`  ${chalk.hex(theme.warning)('⚠')} ${chalk.white(msg)}`),
+  info: (msg) => console.log(`  ${chalk.hex(theme.info)('ℹ')} ${chalk.white(msg)}`),
+  system: (msg) => console.log(`  ${chalk.hex(theme.cyan)('⟳')} ${chalk.gray(msg)}`),
+};
+const createBox = (title, lines, color = theme.primary) => {
+  const w = getWidth();
+  console.log('');
+  console.log(chalk.hex(color)(`  ╔${'═'.repeat(w)}╗`));
+  
+  const cleanTitle = title.replace(/\x1b\[[0-9;]*m/g, '');
+  const titlePad = Math.max(0, w - cleanTitle.length);
+  console.log(chalk.hex(color)(`  ║`) + title + ' '.repeat(titlePad) + chalk.hex(color)('║'));
+  
+  console.log(chalk.hex(color)(`  ╠${'═'.repeat(w)}╣`));
+  
+  lines.forEach(line => {
+    const cleanLine = line.replace(/\x1b\[[0-9;]*m/g, '');
+    const pad = Math.max(0, w - cleanLine.length);
+    console.log(chalk.hex(color)(`  ║`) + line + ' '.repeat(pad) + chalk.hex(color)('║'));
+  });
+  
+  console.log(chalk.hex(color)(`  ╚${'═'.repeat(w)}╝`));
+  console.log('');
 };
 
-function getFilePath(category, id) {
-return path.join(paths[category], `${id}.json`);
-}
-
-async function readFile(category, id) {
-const filePath = getFilePath(category, id);
-const db = new Low(new JSONFile(filePath));
-await db.read();
-db.data = db.data || {};
-return db.data;
-}
-
-async function writeFile(category, id, data) {
-const filePath = getFilePath(category, id);
-const db = new Low(new JSONFile(filePath));
-await db.read();
-db.data = { ...db.data, ...data };    
-await db.write();
-}
-
-global.db.readData = async function (category, id) {
-if (!global.db.data[category][id]) {
-const data = await queue.add(() => readFile(category, id));
-global.db.data[category][id] = data;
-}
-return global.db.data[category][id];
+const createSimpleBox = (title, lines, color = theme.muted) => {
+  const w = getWidth();
+  console.log('');
+  console.log(chalk.hex(color)(`  ╭${'─'.repeat(w)}╮`));
+  
+  const cleanTitle = title.replace(/\x1b\[[0-9;]*m/g, '');
+  const titlePad = Math.max(0, w - cleanTitle.length);
+  console.log(chalk.hex(color)(`  │`) + title + ' '.repeat(titlePad) + chalk.hex(color)('│'));
+  
+  console.log(chalk.hex(color)(`  ├${'─'.repeat(w)}┤`));
+  
+  lines.forEach(line => {
+    const cleanLine = line.replace(/\x1b\[[0-9;]*m/g, '');
+    const pad = Math.max(0, w - cleanLine.length);
+    console.log(chalk.hex(color)(`  │`) + line + ' '.repeat(pad) + chalk.hex(color)('│'));
+  });
+  
+  console.log(chalk.hex(color)(`  ╰${'─'.repeat(w)}╯`));
+  console.log('');
 };
 
-global.db.writeData = async function (category, id, data) {
-global.db.data[category][id] = { ...global.db.data[category][id], ...data };
-await queue.add(() => writeFile(category, id, global.db.data[category][id]));
+await loadPlugins();
+const BOT_SESSION_FOLDER = "./BotSession";
+const BOT_CREDS_PATH = path.join(BOT_SESSION_FOLDER, "creds.json");
+if (!fs.existsSync(BOT_SESSION_FOLDER)) fs.mkdirSync(BOT_SESSION_FOLDER);
+
+if (!globalThis.conns || !(globalThis.conns instanceof Array)) globalThis.conns = [];
+const reconectando = new Set();
+let usarCodigo = false;
+let numero = "";
+
+// --- Detector de spam de "ekey bundle" ---
+let spamCount = 0;
+
+setInterval(() => { spamCount = 0 }, 60 * 1000);
+
+const origError = console.error;
+console.error = (...args) => {
+  if (args[0]?.toString().includes("Closing stale open session")) {
+    spamCount++;
+    if (spamCount > 50) {
+      log.warn("Detectado loop de sesiones, reiniciando...");
+      process.exit(1);
+    }
+  }
+  origError(...args);
 };
 
-global.db.loadDatabase = async function () {
-const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
-const loadPromises = [];
-
-for (const category of categories) {
-const files = fs.readdirSync(paths[category]);
-for (const file of files) {
-const id = path.basename(file, '.json');
-if (category === 'users' && (id.includes('@newsletter') || id.includes('lid'))) continue;
-if (category === 'chats' && id.includes('@newsletter')) continue;
-
-loadPromises.push(queue.add(() => readFile(category, id)).then(data => {
-global.db.data[category][id] = data;
-}).catch(err => console.error(`Error cargando ${category}/${id}:`, err))
+main();
+// Creador CrxsMods
+// Https://Github.com/CrxsMods 
+// https://t.me/CrxsMods 
+async function main() {
+const hayCredencialesPrincipal = fs.existsSync(BOT_CREDS_PATH);
+const subbotsFolder = "./jadibot";
+const haySubbotsActivos = fs.existsSync(subbotsFolder) && fs.readdirSync(subbotsFolder).some(folder => fs.existsSync(path.join(subbotsFolder, folder, "creds.json"))
 );
+
+if (!hayCredencialesPrincipal && !haySubbotsActivos) {
+const mobile = isMobile();
+
+if (mobile) {
+  // Versión móvil compacta
+  createBox(
+    chalk.hex(theme.gold).bold(' 🔐 VINCULACIÓN'),
+    [
+      '',
+      chalk.hex(theme.cyan)(' Selecciona método:'),
+      '',
+      chalk.hex(theme.success)(' ❶ ') + chalk.white('Código QR'),
+      chalk.hex(theme.warning)(' ❷ ') + chalk.white('Código 8 dígitos'),
+      '',
+    ],
+    theme.primary
+  );
+} else {
+  // Versión PC completa
+  createBox(
+    chalk.hex(theme.gold).bold(' 🔐 CONFIGURACIÓN DE VINCULACIÓN'),
+    [
+      '',
+      chalk.hex(theme.cyan)(' Selecciona el método para conectar WhatsApp:'),
+      '',
+      chalk.hex(theme.success).bold('  ❶  ') + chalk.white('Escanear código QR'),
+      chalk.hex(theme.muted)('      └─ Recomendado para conexión rápida'),
+      '',
+      chalk.hex(theme.warning).bold('  ❷  ') + chalk.white('Código de emparejamiento (8 dígitos)'),
+      chalk.hex(theme.muted)('      └─ Útil si no puedes escanear QR'),
+      '',
+    ],
+    theme.primary
+  );
+}
+
+const opcion = readlineSync.question(chalk.hex(theme.secondary).bold('  ➜ ') + chalk.hex(theme.cyan)('Opción: '));
+
+usarCodigo = opcion === "2";
+if (usarCodigo) {
+const mobile = isMobile();
+if (mobile) {
+  createSimpleBox(
+    chalk.hex(theme.cyan).bold(' 📱 NÚMERO'),
+    [
+      chalk.white(' Ej: +5217121649714'),
+      chalk.hex(theme.muted)(' Ej: +5217121649714'),
+    ],
+    theme.info
+  );
+} else {
+  createSimpleBox(
+    chalk.hex(theme.cyan).bold(' 📱 INGRESO DE NÚMERO TELEFÓNICO'),
+    [
+      '',
+      chalk.white(' Ingresa tu número con código de país'),
+      chalk.hex(theme.muted)(' Ejemplo: ') + chalk.hex(theme.success)('+52') + chalk.white('1234567890'),
+      '',
+    ],
+    theme.info
+  );
+}
+numero = readlineSync.question(chalk.hex(theme.secondary).bold('  ➜ ') + chalk.hex(theme.cyan)('Número: ')).replace(/[^0-9]/g, '');
+if (numero.startsWith('52') && !numero.startsWith('521')) {
+numero = '521' + numero.slice(2);
 }}
-await Promise.all(loadPromises);
-console.log('Base de datos cargada');
-};
-
-global.db.save = async function () {
-const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
-
-for (const category of categories) {
-for (const [id, data] of Object.entries(global.db.data[category])) {
-if (Object.keys(data).length > 0) {
-if (category === 'users' && (id.includes('@newsletter') || id.includes('lid'))) continue;
-if (category === 'chats' && id.includes('@newsletter')) continue;
-
-await queue.add(() => writeFile(category, id, data))
-}}}};
-
-global.db.loadDatabase().then(() => {
-}).catch(err => console.error(err));
-
-/*global.db = new Low(/https?:\/\//.test(opts['db'] || '') ? new cloudDBAdapter(opts['db']) : new JSONFile('database.json'))
-global.DATABASE = global.db; 
-global.loadDatabase = async function loadDatabase() {
-if (global.db.READ) {
-return new Promise((resolve) => setInterval(async function() {
-if (!global.db.READ) {
-clearInterval(this);
-resolve(global.db.data == null ? global.loadDatabase() : global.db.data);
-}}, 1 * 1000));
 }
-if (global.db.data !== null) return;
-global.db.READ = true;
-await global.db.read().catch(console.error);
-global.db.READ = null;
-global.db.data = {
-users: {},
-chats: {},
-stats: {},
-msgs: {},
-sticker: {},
-settings: {},
-...(global.db.data || {}),
-};
-global.db.chain = chain(global.db.data);
-};
-loadDatabase();*/
 
-//if (global.conns instanceof Array) {console.log('Conexiones ya inicializadas...');} else {global.conns = [];}
+await cargarSubbots();
 
-/* ------------------------------------------------*/
+if (hayCredencialesPrincipal || !haySubbotsActivos) {
+try {
+await startBot();
+} catch (err) {
+log.error("Error al iniciar bot principal");
+console.error(err);
+}} else {
+log.warn("Subbots activos. Bot principal desactivado.");
+}}
 
-global.creds = 'creds.json'
-global.authFile = `BotSession`
-global.authFileJB  = 'jadibts'
-global.rutaBot = join(__dirname, authFile)
-global.rutaJadiBot = join(__dirname, authFileJB)
-const respaldoDir = join(__dirname, 'BackupSession');
-const credsFile = join(global.rutaBot, global.creds);
-const backupFile = join(respaldoDir, global.creds);
+async function cargarSubbots() {
+const folder = "./jadibot";
+if (!fs.existsSync(folder)) return;
 
-if (!fs.existsSync(rutaJadiBot)) {
-fs.mkdirSync(rutaJadiBot)}
+const subbotIds = fs.readdirSync(folder);
 
-if (!fs.existsSync(respaldoDir)) fs.mkdirSync(respaldoDir);
+for (const userId of subbotIds) {
+const sessionPath = path.join(folder, userId);
+const credsPath = path.join(sessionPath, "creds.json");
+if (!fs.existsSync(credsPath)) continue;
+if (globalThis.conns?.some(conn => conn.userId === userId)) continue;
+if (reconectando.has(userId)) continue;
 
-const {state, saveState, saveCreds} = await useMultiFileAuthState(global.authFile)
+try {
+reconectando.add(userId);
+await startSubBot(null, null, "Auto reconexión", false, userId, null);
+} catch (e) {
+log.error(`Falló carga de ${userId}`);
+} finally {
+reconectando.delete(userId);
+}
+
+await new Promise(res => setTimeout(res, 2500))}
+setTimeout(cargarSubbots, 60 * 1000); 
+}
+
+async function startBot() {
+const { state, saveCreds } = await baileys.useMultiFileAuthState(BOT_SESSION_FOLDER);
 const msgRetryCounterMap = new Map();
-const msgRetryCounterCache = new NodeCache({ stdTTL: 0, checkperiod: 0 });
+const msgRetryCounterCache = new NodeCache({ stdTTL: 0, checkperiod: 0 }); 
 const userDevicesCache = new NodeCache({ stdTTL: 0, checkperiod: 0 });
-const {version} = await fetchLatestBaileysVersion()
-let phoneNumber = global.botNumberCode
-const methodCodeQR = process.argv.includes("qr")
-const methodCode = !!phoneNumber || process.argv.includes("code")
-const MethodMobile = process.argv.includes("mobile")
-let rl = readline.createInterface({
-input: process.stdin,
-output: process.stdout,
-terminal: true,
-})
-
-const question = (texto) => {
-rl.clearLine(rl.input, 0)
-return new Promise((resolver) => {
-rl.question(texto, (respuesta) => {
-rl.clearLine(rl.input, 0)
-resolver(respuesta.trim())
-})})
-}
-
-let opcion
-if (methodCodeQR) {
-opcion = '1'
-}
-if (!methodCodeQR && !methodCode && !fs.existsSync(`./${authFile}/creds.json`)) {
-do {
-let lineM = '⋯ ⋯ ⋯ ⋯ ⋯ ⋯ ⋯ ⋯ ⋯ ⋯ ⋯ 》'
-opcion = await question(`╭${lineM}  
-┊ ${chalk.blueBright('╭┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅')}
-┊ ${chalk.blueBright('┊')} ${chalk.blue.bgBlue.bold.cyan('MÉTODO DE VINCULACIÓN')}
-┊ ${chalk.blueBright('╰┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅')}   
-┊ ${chalk.blueBright('╭┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅')}     
-┊ ${chalk.blueBright('┊')} ${chalk.green.bgMagenta.bold.yellow('¿CÓMO DESEA CONECTARSE?')}
-┊ ${chalk.blueBright('┊')} ${chalk.bold.redBright('⇢  Opción 1:')} ${chalk.greenBright('Código QR.')}
-┊ ${chalk.blueBright('┊')} ${chalk.bold.redBright('⇢  Opción 2:')} ${chalk.greenBright('Código de 8 digitos.')}
-┊ ${chalk.blueBright('╰┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅')}
-┊ ${chalk.blueBright('╭┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅')}     
-┊ ${chalk.blueBright('┊')} ${chalk.italic.magenta('Escriba sólo el número de')}
-┊ ${chalk.blueBright('┊')} ${chalk.italic.magenta('la opción para conectarse.')}
-┊ ${chalk.blueBright('╰┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅')} 
-╰${lineM}\n${chalk.bold.magentaBright('---> ')}`)
-if (!/^[1-2]$/.test(opcion)) {
-console.log(chalk.bold.redBright(`NO SE PERMITE NÚMEROS QUE NO SEAN ${chalk.bold.greenBright("1")} O ${chalk.bold.greenBright("2")}, TAMPOCO LETRAS O SÍMBOLOS ESPECIALES. ${chalk.bold.yellowBright("CONSEJO: COPIE EL NÚMERO DE LA OPCIÓN Y PÉGUELO EN LA CONSOLA.")}`))
-}} while (opcion !== '1' && opcion !== '2' || fs.existsSync(`./${authFile}/creds.json`))
-}
-
-console.info = () => {} 
-/*const connectionOptions = {
-logger: pino({ level: 'silent' }),
-printQRInTerminal: opcion == '1' ? true : methodCodeQR ? true : false,
-mobile: MethodMobile, 
-browser: opcion == '1' ? ['KANTU-MD', 'Edge', '20.0.04'] : methodCodeQR ? ['KANTU-MD', 'Edge', '20.0.04'] : ["Ubuntu", "Chrome", "20.0.04"],
-auth: {
-creds: state.creds,
-keys: makeCacheableSignalKeyStore(state.keys, Pino({ level: "fatal" }).child({ level: "fatal" })),
+const groupCache = new NodeCache({ stdTTL: 3600, checkperiod: 300 });
+const { version } = await baileys.fetchLatestBaileysVersion();
+// Creador CrxsMods
+// Https://Github.com/CrxsMods 
+// https://t.me/CrxsMods 
+console.info = () => {};
+console.debug = () => {};
+const sock = baileys.makeWASocket({
+printQRInTerminal: !usarCodigo && !fs.existsSync(BOT_CREDS_PATH),
+logger: pino({ level: 'silent' }),   
+browser: ['Windows', 'Chrome'],
+auth: { creds: state.creds,
+keys: baileys.makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
 },
 markOnlineOnConnect: false, 
 generateHighQualityLinkPreview: true, 
 syncFullHistory: false,
-getMessage: async (key) => {
-try {
-let jid = jidNormalizedUser(key.remoteJid);
-let msg = await store.loadMessage(jid, key.id);
-return msg?.message || "";
-} catch (error) {
+getMessage: async () => {
 return "";
-}},
+},
 msgRetryCounterCache: msgRetryCounterCache || new Map(),
 userDevicesCache: userDevicesCache || new Map(),
-//msgRetryCounterMap,
 defaultQueryTimeoutMs: undefined,
-cachedGroupMetadata: (jid) => global.conn.chats[jid] ?? {},
-version: [2, 3000, 1015901307],
-};*/
+cachedGroupMetadata: async (jid) => groupCache.get(jid),
+version: version, 
+defaultQueryTimeoutMs: 30_000,
+keepAliveIntervalMs: 55000, 
+maxIdleTimeMs: 60000, 
+});
 
-const connectionOptions = {
-logger: pino({ level: 'silent' }),
-printQRInTerminal: opcion == '1' ? true : methodCodeQR ? true : false,
-mobile: MethodMobile, 
-auth: {
-creds: state.creds,
-keys: makeCacheableSignalKeyStore(state.keys, Pino({ level: "fatal" }).child({ level: "fatal" })),
-},
-browser: opcion == '1' ? ['KantuBot', 'Edge', '20.0.04'] : methodCodeQR ? ['KantuBot', 'Edge', '20.0.04'] : ["Ubuntu", "Chrome", "20.0.04"],
-version: version,
-generateHighQualityLinkPreview: true
-};
-    
-global.conn = makeWASocket(connectionOptions)
+globalThis.conn = sock;
+setupGroupEvents(sock);
+sock.ev.on("creds.update", saveCreds);
 
-if (!fs.existsSync(`./${authFile}/creds.json`)) {
-if (opcion === '2' || methodCode) {
-opcion = '2'
-if (!conn.authState.creds.registered) {
-let addNumber
-if (!!phoneNumber) {
-addNumber = phoneNumber.replace(/[^0-9]/g, '')
+sock.ev.on("connection.update", async ({ connection, lastDisconnect }) => {
+const code = lastDisconnect?.error?.output?.statusCode || 0;
+const mobile = isMobile();
+
+if (connection === "open") {
+const connTime = new Date().toLocaleTimeString('es-MX', { hour12: false });
+
+if (mobile) {
+  createBox(
+    chalk.bold.white(' ✅ CONECTADO'),
+    [
+      '',
+      chalk.hex(theme.green)(' ◈ ') + chalk.white('WhatsApp listo'),
+      chalk.hex(theme.muted)(` ◈ ${connTime}`),
+      '',
+    ],
+    theme.success
+  );
 } else {
-do {
-phoneNumber = await question(chalk.bgBlack(chalk.bold.greenBright("\n\n✳️ Escriba su número\n\nEjemplo: 5491168xxxx\n\n\n\n")))
-phoneNumber = phoneNumber.replace(/\D/g,'')
-if (!phoneNumber.startsWith('+')) {
-phoneNumber = `+${phoneNumber}`
-}
-} while (!await isValidPhoneNumber(phoneNumber))
-rl.close()
-addNumber = phoneNumber.replace(/\D/g, '')
-setTimeout(async () => {
-let codeBot = await conn.requestPairingCode(addNumber)
-codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot
-console.log(chalk.bold.white(chalk.bgMagenta(`CÓDIGO DE VINCULACIÓN:`)), chalk.bold.white(chalk.white(codeBot)))
-}, 2000)
-}}}
-}
-
-conn.isInit = false
-conn.well = false
-
-if (!opts['test']) {
-setInterval(async () => {
-if (global.db.data) await global.db.save();
-if (opts['autocleartmp'] && (global.support || {}).find) {
-const tmpDirs = [os.tmpdir(), 'tmp', "jadibts"];
-tmpDirs.forEach(dir => {
-cp.spawn('find', [dir, '-amin', '2', '-type', 'f', '-delete']);
-})}}, 30 * 1000)}
-if (opts['server']) (await import('./server.js')).default(global.conn, PORT)
-
-//respaldo de la sesión
-function manageCredentials(action) {
-const credsFile = join(global.rutaBot, global.creds);
-const backupFile = join(respaldoDir, global.creds);
-if (action === 'backup' && existsSync(credsFile)) {
-copyFileSync(credsFile, backupFile);
-console.log(`[✅] Respaldo creado en ${backupFile}`);
-} else if (action === 'restore' && existsSync(backupFile)) {
-copyFileSync(backupFile, credsFile);
-console.log(`[✅] creds.json restaurado desde el respaldo`);
+  createBox(
+    chalk.bold.white(' ✅ CONEXIÓN ESTABLECIDA CON ÉXITO'),
+    [
+      '',
+      chalk.hex(theme.cyan)(' ◈ Estado:     ') + chalk.hex(theme.green).bold('CONECTADO'),
+      chalk.hex(theme.cyan)(' ◈ Plataforma: ') + chalk.white('WhatsApp Multi-Device'),
+      chalk.hex(theme.cyan)(' ◈ Hora:       ') + chalk.white(connTime),
+      '',
+      chalk.hex(theme.muted)(' 🤖 Bot listo para recibir comandos'),
+      '',
+    ],
+    theme.success
+  );
 }
 }
 
-setInterval(() => manageCredentials('backup'), 5 * 60 * 1000);
-
-//tmp
-async function cleanUp(type) {
-const targets = {
-tmp: join(__dirname, 'tmp'),
-session: './BotSession',
-subbots: './jadibts/'
-};
-if (type === 'tmp') {
-const files = readdirSync(targets.tmp);
-files.forEach(file => unlinkSync(join(targets.tmp, file)));
-console.log(chalk.cyan(`┏━━━━━━⪻♻️ AUTO-CLEAR 🗑️⪼━━━━━━•\n┃→ ARCHIVOS DE LA CARPETA TMP ELIMINADOS\n┗━━━━━━━━━━━━━━━━━━━━━━━━━━━•`));
-} else if (type === 'session' || type === 'subbots') {
-const dir = targets[type];
-const files = readdirSync(dir).filter(f => f.startsWith('pre-key-'));
-const threshold = Date.now() - (24 * 60 * 60 * 1000);
-for (const file of files) {
-const filePath = join(dir, file);
-const { mtimeMs } = statSync(filePath);
-if (mtimeMs < threshold) await unlinkSync(filePath);
-}
-console.log(chalk.bold.cyanBright(`\n╭» 🔵 ${type} 🔵\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― 🗑️♻️`));
-}}
-
-setInterval(() => cleanUp('tmp'), 1000 * 60 * 3);
-setInterval(() => { cleanUp('session'); cleanUp('subbots'); }, 1000 * 60 * 10);
-
-async function connectionUpdate(update) {  
-const {connection, lastDisconnect, isNewLogin} = update
-global.stopped = connection
-if (isNewLogin) conn.isInit = true
-const code = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode
-if (code && code !== DisconnectReason.loggedOut && conn?.ws.socket == null) {
-await global.reloadHandler(true).catch(console.error)
-//console.log(await global.reloadHandler(true).catch(console.error));
-global.timestamp.connect = new Date
-}
-if (global.db.data == null) loadDatabase()
-if (update.qr != 0 && update.qr != undefined || methodCodeQR) {
-if (opcion == '1' || methodCodeQR) {
-console.log(chalk.cyan('✅ ESCANEA EL CÓDIGO QR EXPIRA EN 45 SEGUNDOS ✅.'))
-}}
-if (connection == 'open') {
-console.log(chalk.bold.greenBright('\n▣─────────────────────────────···\n│\n│❧ 𝙲𝙾𝙽𝙴𝙲𝚃𝙰𝙳𝙾 𝙲𝙾𝚁𝚁𝙴𝙲𝚃𝙰𝙼𝙴𝙽𝚃𝙴 𝙰𝙻 𝚆𝙷𝙰𝚃𝚂𝙰𝙿𝙿 ✅\n│\n▣─────────────────────────────···'))
-await joinChannels(conn)
-}
-let reason = new Boom(lastDisconnect?.error)?.output?.statusCode
-if (connection === 'close') {
-if (reason === DisconnectReason.badSession) {
-conn.logger.error(`[ ⚠ ] Sesión incorrecta, por favor elimina la carpeta ${global.authFile} y escanea nuevamente.`);
-} else if (reason === DisconnectReason.connectionClosed) {
-conn.logger.warn(`[ ⚠ ] Conexión cerrada, reconectando...`);
-manageCredentials('restore');
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.connectionLost) {
-conn.logger.warn(`[ ⚠ ] Conexión perdida con el servidor, reconectando...`);
-manageCredentials('restore');
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.connectionReplaced) {
-conn.logger.error(`[ ⚠ ] Conexión reemplazada, se ha abierto otra nueva sesión. Por favor, cierra la sesión actual primero.`);
-} else if (reason === DisconnectReason.loggedOut) {
-conn.logger.error(`[ ⚠ ] Conexion cerrada, por favor elimina la carpeta ${global.authFile} y escanea nuevamente.`);
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.restartRequired) {
-conn.logger.info(`[ ⚠ ] Reinicio necesario, reinicie el servidor si presenta algún problema.`);
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.timedOut) {
-conn.logger.warn(`[ ⚠ ] Tiempo de conexión agotado, reconectando...`);
-await global.reloadHandler(true).catch(console.error) //process.send('reset')
+if (connection === "close") {
+if ([401, 440, 428, 405].includes(code)) {
+if (mobile) {
+  createBox(
+    chalk.bold.white(' ❌ ERROR SESIÓN'),
+    [
+      '',
+      chalk.hex(theme.warning)(` ⚠ Código: ${code}`),
+      chalk.white(' Borra "BotSession"'),
+      '',
+    ],
+    theme.error
+  );
 } else {
-conn.logger.warn(`[ ⚠ ] Razón de desconexión desconocida. ${reason || ''}: ${connection || ''}`);
-}}}
+  createBox(
+    chalk.bold.white(' ❌ ERROR DE SESIÓN'),
+    [
+      '',
+      chalk.hex(theme.warning)(`  ⚠ Código de error: ${code}`),
+      '',
+      chalk.hex(theme.muted)('  Solución:'),
+      chalk.white('  1. Elimina la carpeta "BotSession"'),
+      chalk.white('  2. Reinicia el bot'),
+      chalk.white('  3. Vincula nuevamente'),
+      '',
+    ],
+    theme.error
+  );
+}
+}
+log.system("Reconectando en 3s...");
+setTimeout(() => startBot(), 3000);
+}});
 
 process.on('uncaughtException', console.error);
-
-let isInit = true;
-let handler = await import('./handler.js');
-global.reloadHandler = async function(restatConn) {
+process.on('unhandledRejection', console.error);
+  
+if (usarCodigo && !state.creds.registered) {
+setTimeout(async () => {
 try {
-const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error);
-if (Object.keys(Handler || {}).length) handler = Handler;
-} catch (e) {
-console.error(e);
+const code = await sock.requestPairingCode(numero);
+const mobile = isMobile();
+
+if (mobile) {
+  createBox(
+    chalk.bold.white(' 🔑 CÓDIGO'),
+    [
+      '',
+      '   ' + chalk.bgHex('#1a1a2e').hex(theme.success).bold(` ${code} `),
+      '',
+      chalk.hex(theme.muted)(' Ingresa en WhatsApp'),
+      '',
+    ],
+    theme.info
+  );
+} else {
+  createBox(
+    chalk.bold.white(' 🔑 CÓDIGO DE EMPAREJAMIENTO'),
+    [
+      '',
+      '       ' + chalk.bgHex('#1a1a2e').hex(theme.success).bold(`  ✦  ${code}  ✦  `),
+      '',
+      chalk.hex(theme.muted)(' 📲 Instrucciones:'),
+      chalk.white(' 1. Abre WhatsApp'),
+      chalk.white(' 2. Ajustes > Dispositivos vinculados'),
+      chalk.white(' 3. Vincular con número de teléfono'),
+      chalk.white(' 4. Ingresa el código de arriba'),
+      '',
+    ],
+    theme.info
+  );
 }
-if (restatConn) {
-const oldChats = global.conn.chats;
+} catch {}
+}, 2000);
+}
+
+sock.ev.on("messages.upsert", async ({ messages, type }) => {
+if (type !== "notify") return;
+for (const msg of messages) {
+if (!msg.message) continue;
+if (msg.messageTimestamp && (Date.now()/1000 - msg.messageTimestamp > 120)) continue; 
+if(msg.key.id.startsWith('NJX-') || msg.key.id.startsWith('Lyru-') || msg.key.id.startsWith('EvoGlobalBot-') || msg.key.id.startsWith('BAE5') && msg.key.id.length === 16 || msg.key.id.startsWith('3EB0') && msg.key.id.length === 12 || msg.key.id.startsWith('3EB0') || msg.key.id.startsWith('3E83') || msg.key.id.startsWith('3E38') && (msg.key.id.length === 20 || msg.key.id.length === 22) || msg.key.id.startsWith('B24E') || msg.key.id.startsWith('8SCO') && msg.key.id.length === 20 || msg.key.id.startsWith('FizzxyTheGreat-')) return
 try {
-global.conn.ws.close();
-} catch { }
-conn.ev.removeAllListeners();
-global.conn = makeWASocket(connectionOptions, {chats: oldChats});
-isInit = true;
-}
-if (!isInit) {
-conn.ev.off('messages.upsert', conn.handler);
-conn.ev.off('group-participants.update', conn.participantsUpdate);
-conn.ev.off('groups.update', conn.groupsUpdate);
-conn.ev.off('message.delete', conn.onDelete);
-conn.ev.off('call', conn.onCall);
-conn.ev.off('connection.update', conn.connectionUpdate);
-conn.ev.off('creds.update', conn.credsUpdate);
-}
-
-conn.welcome = 'HOLAA!! @user\n\n『Bienvenido A *@subject*』\n\n_`Recuerda leer las reglas del grupo para no tener ningun problema 🐣`_'
-conn.bye = 'Bueno, se fue @user 👋\n\nQue lo atropelle un tren 👻`'
-conn.spromote = 'Hey @user ya forma parte de staff 👑'
-conn.sdemote = '@user ya no eres admins'
-conn.sDesc = 'La descripción ha sido cambiada a \n@desc'
-conn.sSubject = 'El nombre del grupo ha sido cambiado a \n@group'
-conn.sIcon = 'El icono del grupo ha sido cambiado'
-conn.sRevoke = 'El enlace del grupo ha sido cambiado a \n@revoke'
-conn.handler = handler.handler.bind(global.conn);
-conn.participantsUpdate = handler.participantsUpdate.bind(global.conn);
-conn.groupsUpdate = handler.groupsUpdate.bind(global.conn);
-conn.onDelete = handler.deleteUpdate.bind(global.conn);
-conn.onCall = handler.callUpdate.bind(global.conn);
-conn.connectionUpdate = connectionUpdate.bind(global.conn);
-conn.credsUpdate = saveCreds.bind(global.conn, true);
-conn.ev.on('messages.upsert', conn.handler);
-conn.ev.on('group-participants.update', conn.participantsUpdate);
-conn.ev.on('groups.update', conn.groupsUpdate);
-conn.ev.on('message.delete', conn.onDelete);
-conn.ev.on('call', conn.onCall);
-conn.ev.on('connection.update', conn.connectionUpdate);
-conn.ev.on('creds.update', conn.credsUpdate);
-isInit = false
-return true
-}
-
-//Arranque nativo para subbots
-await startSubBots();
-
-/*const pluginFolder = global.__dirname(join(__dirname, './plugins/index'));
-const pluginFilter = (filename) => /\.js$/.test(filename);
-global.plugins = {};
-async function filesInit() {
-for (const filename of readdirSync(pluginFolder).filter(pluginFilter)) {
-try {
-const file = global.__filename(join(pluginFolder, filename));
-const module = await import(file);
-global.plugins[filename] = module.default || module;
-} catch (e) {
-conn.logger.error(e);
-delete global.plugins[filename];
-}}}
-filesInit().then((_) => Object.keys(global.plugins)).catch(console.error)*/
-
-const pluginFolder = global.__dirname(join(__dirname, './plugins/index'))
-const pluginFilter = (filename) => /\.js$/.test(filename)
-global.plugins = {}
-async function filesInit() {
-for (const filename of readdirSync(pluginFolder).filter(pluginFilter)) {
-try {
-const file = global.__filename(join(pluginFolder, filename))
-const module = await import(file)
-global.plugins[filename] = module.default || module
-} catch (e) {
-conn.logger.error(e)
-delete global.plugins[filename]
-}}}
-filesInit().then((_) => Object.keys(global.plugins)).catch(console.error)
-
-global.reload = async (_ev, filename) => {
-if (pluginFilter(filename)) {
-const dir = global.__filename(join(pluginFolder, filename), true)
-if (filename in global.plugins) {
-if (existsSync(dir)) conn.logger.info(` SE ACTULIZADO - '${filename}' CON ÉXITO`)
-else {
-conn.logger.warn(`SE ELIMINO UN ARCHIVO : '${filename}'`)
-return delete global.plugins[filename];
-}
-} else conn.logger.info(`SE DETECTO UN NUEVO PLUGINS : '${filename}'`)
-const err = syntaxerror(readFileSync(dir), filename, {
-sourceType: 'module',
-allowAwaitOutsideFunction: true,
+await handler(sock, msg);
+} catch (err) {
+console.error(err);
+}}
 });
-if (err) conn.logger.error(`SE DETECTO UN ERROR DE SINTAXIS | SYNTAX ERROR WHILE LOADING '${filename}'\n${format(err)}`);
-else {
+  
+sock.ev.on("call", async (calls) => {
 try {
-const module = (await import(`${global.__filename(dir)}?update=${Date.now()}`));
-global.plugins[filename] = module.default || module;
-} catch (e) {
-conn.logger.error(`HAY UN ERROR REQUIERE EL PLUGINS '${filename}\n${format(e)}'`);
-} finally {
-global.plugins = Object.fromEntries(Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b)));
-}}}};
-Object.freeze(global.reload);
-watch(pluginFolder, global.reload);
-await global.reloadHandler();
-async function _quickTest() {
-const test = await Promise.all([
-spawn('ffmpeg'),
-spawn('ffprobe'),
-spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-filter_complex', 'color', '-frames:v', '1', '-f', 'webp', '-']),
-spawn('convert'),
-spawn('magick'),
-spawn('gm'),
-spawn('find', ['--version']),
-].map((p) => {
-return Promise.race([
-new Promise((resolve) => {
-p.on('close', (code) => {
-resolve(code !== 127);
+for (const call of calls) {
+await callUpdate(sock, call);
+}} catch (err) {
+log.error("Error en llamada");
+console.error(err);
+}
 });
-}),
-new Promise((resolve) => {
-p.on('error', (_) => resolve(false));
-})]);
-}));
-
-const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test;
-const s = global.support = {ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find};
-Object.freeze(global.support);
-}
-
-function redefineConsoleMethod(methodName, filterStrings) {
-const originalConsoleMethod = console[methodName]
-console[methodName] = function() {
-const message = arguments[0]
-if (typeof message === 'string' && filterStrings.some(filterString => message.includes(atob(filterString)))) {
-arguments[0] = ""
-}
-originalConsoleMethod.apply(console, arguments)
-}}
-
-_quickTest().then(() => conn.logger.info('Ƈᴀʀɢᴀɴᴅᴏ．．．.\n'))
-.catch(console.error)
-
-async function isValidPhoneNumber(number) {
+    
+//tmp    
+setInterval(() => {
+const tmp = './tmp';
 try {
-number = number.replace(/\s+/g, '')
-// Si el número empieza con '+521' o '+52 1', quitar el '1'
-if (number.startsWith('+521')) {
-number = number.replace('+521', '+52'); // Cambiar +521 a +52
-} else if (number.startsWith('+52') && number[4] === '1') {
-number = number.replace('+52 1', '+52'); // Cambiar +52 1 a +52
+if (!fs.existsSync(tmp)) return;
+const files = fs.readdirSync(tmp);
+files.forEach(file => {
+if (file.endsWith('.file')) return;
+const filePath = path.join(tmp, file);
+const stats = fs.statSync(filePath);
+const now = Date.now();
+const modifiedTime = new Date(stats.mtime).getTime();
+const age = now - modifiedTime;
+if (age > 3 * 60 * 1000) {
+fs.unlinkSync(filePath);
 }
-const parsedNumber = phoneUtil.parseAndKeepRawInput(number)
-return phoneUtil.isValidNumber(parsedNumber)
-} catch (error) {
-return false
-}}
+})
+} catch (err) {
+console.error('Error cleaning tmp:', err);
+}}, 30 * 1000);
+// Creador CrxsMods
+// Https://Github.com/CrxsMods 
+// https://t.me/CrxsMods    
+setInterval(() => {
+const mobile = isMobile();
+if (mobile) {
+  console.log('');
+  log.warn('♻️ Reiniciando...');
+  console.log('');
+} else {
+  createSimpleBox(
+    chalk.bold.white(' ♻️  REINICIO AUTOMÁTICO'),
+    [
+      chalk.hex(theme.muted)(' Reiniciando para mantener rendimiento...'),
+    ],
+    theme.warning
+  );
+}
+process.exit(0); 
+}, 10800000) //3hs
 
-async function joinChannels(conn) {
-for (const channelId of Object.values(global.ch)) {
-await conn.newsletterFollow(channelId).catch(() => {})
-}}
+//tmp session basura
+setInterval(() => {
+  const now = Date.now();
+  const carpetas = ['./jadibot', './BotSession'];
+  for (const basePath of carpetas) {
+    if (!fs.existsSync(basePath)) continue;
+
+    const subfolders = fs.readdirSync(basePath);
+    for (const folder of subfolders) {
+      const sessionPath = path.join(basePath, folder);
+      if (!fs.statSync(sessionPath).isDirectory()) continue;
+      const isActive = globalThis.conns?.some(c => c.userId === folder || c.user?.id?.includes(folder));
+      const files = fs.readdirSync(sessionPath);
+
+      const prekeys = files.filter(f => f.startsWith("pre-key"));
+      if (prekeys.length > 500) {
+        prekeys
+          .sort((a, b) => fs.statSync(path.join(sessionPath, a)).mtimeMs - fs.statSync(path.join(sessionPath, b)).mtimeMs)
+          .slice(0, prekeys.length - 300)
+          .forEach(pk => {
+            fs.unlinkSync(path.join(sessionPath, pk));
+          });
+      }
+
+      for (const file of files) {
+        const fullPath = path.join(sessionPath, file);
+        if (!fs.existsSync(fullPath)) continue;
+        if (file === 'creds.json') continue;
+        try {
+          const stats = fs.statSync(fullPath);
+          const ageMs = now - stats.mtimeMs;
+
+          if (file.startsWith('pre-key') && ageMs > 24 * 60 * 60 * 1000 && !isActive) {
+            fs.unlinkSync(fullPath);
+          } else if (ageMs > 30 * 60 * 1000 && !isActive) {
+            fs.unlinkSync(fullPath);
+          }
+        } catch (err) {
+          log.error(`Error limpiando ${file}`);
+        }
+      }
+    }
+  }
+  
+  const mobile = isMobile();
+  if (mobile) {
+    console.log('');
+    log.success('Limpieza completada');
+    console.log('');
+  } else {
+    createSimpleBox(
+      chalk.bold.white(' 🗑️  LIMPIEZA AUTOMÁTICA'),
+      [
+        '',
+        chalk.hex(theme.success)(' ✔ ') + chalk.white('Temporales eliminados'),
+        chalk.hex(theme.success)(' ✔ ') + chalk.white('Sesiones optimizadas'),
+        chalk.hex(theme.success)(' ✔ ') + chalk.white('Pre-keys limpiadas'),
+        '',
+      ],
+      theme.cyan
+    );
+  }
+}, 10 * 60 * 1000);
+    
+function setupGroupEvents(sock) {
+sock.ev.on("group-participants.update", async (update) => {
+console.log(update)
+try {
+await participantsUpdate(sock, update);
+} catch (err) {
+log.error("Error en participantes");
+console.error(err);
+}});
+
+sock.ev.on("groups.update", async (updates) => {
+console.log(updates)
+try {
+for (const update of updates) {
+await groupsUpdate(sock, update);
+}} catch (err) {
+log.error("Error en grupo");
+console.error(err);
+}});
+}
+}

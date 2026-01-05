@@ -17,8 +17,7 @@ const res = await acr.identify(fs.readFileSync(`./tmp/${m.sender}.${ext}`));
 const {code, msg} = res.status;
 if (code !== 0) throw msg;
 const {title, artists, album, genres, release_date} = res.metadata.music[0];
-const txt = `
-𝐑𝐄𝐒𝐄𝐋𝐓𝐀𝐃𝐎𝐒 𝐃𝐄 𝐋𝐀 𝐁𝐔𝐒𝐐𝐔𝐄𝐃𝐀
+const txt = `*\`RESULTADOS DE LA BÚSQUEDA*\`
 
 • 📌 𝐓𝐢𝐭𝐮𝐥𝐨: ${title}
 • 👨‍🎤 𝐀𝐫𝐭𝐢𝐬𝐭𝐚: ${artists !== undefined ? artists.map((v) => v.name).join(', ') : 'No encontrado'}

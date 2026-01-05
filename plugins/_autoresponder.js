@@ -1,84 +1,144 @@
-import axios from 'axios';
 import fetch from 'node-fetch';
-import translate from '@vitalets/google-translate-api';
-import { sticker } from '../lib/sticker.js';
-import { perplexity } from '../lib/scraper.js';
+import fs from 'fs';
+import path from 'path';
+import axios from 'axios';
+import { exoml } from '../lib/scraper.js';
+import { db } from '../lib/postgres.js';
 
-//let handler = m => m;
-//handler.all = async function (m, {conn}) {
+const MAX_TURNS = 12;
+
+let GROQ_API_KEY_CACHE = null;
+
+async function getGroqKey() {
+  if (GROQ_API_KEY_CACHE) return GROQ_API_KEY_CACHE;
+
+  const { rows } = await db.query(
+    "SELECT token_b64 FROM api_tokens WHERE name = $1",
+    ["groq"]
+  );
+
+  if (!rows.length) throw new Error("Token GROQ no encontrado");
+
+  GROQ_API_KEY_CACHE = Buffer
+    .from(rows[0].token_b64, "base64")
+    .toString("utf8");
+
+  return GROQ_API_KEY_CACHE;
+}
+
+const GROQ_API_KEY = await getGroqKey();
+
 export async function before(m, { conn }) {
-let user = global.db.data.users[m.sender]
-let chat = global.db.data.chats[m.chat];
-let setting = global.db.data.settings[this.user.jid]
-let prefixRegex = new RegExp('^[' + setting.prefix.replace(/[|\\{}()[\]^$+*.\-\^]/g, '\\$&') + ']');
+const botIds = [conn.user?.id, conn.user?.lid].filter(Boolean).map(j => j.split('@')[0].split(':')[0]);
 
-//if (prefixRegex.test(m.text)) return true;
-if (m.mentionedJid.includes(this.user.jid)) {
-//if (m.mentionedJid.includes(this.user.jid) || (m.quoted && m.quoted.sender === this.user.jid)) {
-if (chat.simi) return;
-if (m.text.includes('PIEDRA') || m.text.includes('PAPEL') || m.text.includes('TIJERA') ||  m.text.includes('menu') ||  m.text.includes('estado') || m.text.includes('bots') ||  m.text.includes('serbot') || m.text.includes('jadibot') || m.text.includes('Video') || m.text.includes('Audio') || m.text.includes('audio') || m.text.includes('Bot') || m.text.includes('bot') || m.text.includes('Exp') || m.text.includes('diamante') || m.text.includes('kantucoins') || m.text.includes('Diamante') || m.text.includes('Kantucoins')) return !0
-if (["120363371008200788@newsletter", "120363371008200788@newsletter"].includes(m.chat)) return;
-await this.sendPresenceUpdate('composing', m.chat);
+const mentioned = [...(m.mentionedJid || []),
+m.msg?.contextInfo?.participant,
+m.msg?.contextInfo?.remoteJid].filter(Boolean);
 
-async function luminsesi(q, username, logic) {
-try {
-const response = await axios.post("https://luminai.my.id", {
-content: q,
-user: username,
-prompt: logic,
-webSearchMode: true // true = resultado con url
+const mention = mentioned.some(j => {
+const num = j?.split('@')[0]?.split(':')[0];
+return botIds.includes(num);
 });
-return response.data.result;
-} catch (error) {
-console.error(error);
+
+function formatForWhatsApp(text) {
+  return text
+    .replace(/\*\*/g, "*") 
+    .replace(/\_\_/g, "_") 
+    .replace(/\\n/g, "\n") 
+    .replace(/\n{3,}/g, "\n\n") 
+    .trim();
+}
+
+//const isReplyToBot = m.quoted && [conn.user?.id, conn.user?.lid].some(id => id?.includes(m.quoted.sender));
+//if (!mention && !isReplyToBot) return true;
+const triggerWords = /\b(bot|simi|alexa|kantubot)\b/i;
+if (!mention && !triggerWords.test(m.originalText)) return true;
+//if (!mention) return true;
+
+const no_cmd = /(PIEDRA|PAPEL|TIJERA|menu|estado|bots?|serbot|jadibot|Video|Audio|Exp|diamante|kantucoins?)/i;
+if (no_cmd.test(m.text)) return true;
+
+await conn.sendPresenceUpdate("composing", m.chat);
+const chatId = m.chat;
+const query = m.text;
+let memory = [];
+let systemPrompt = '';
+let ttl = 86400; // 1 día por defecto
+try {
+const { rows } = await db.query('SELECT sautorespond, memory_ttl FROM group_settings WHERE group_id = $1', [chatId]);
+systemPrompt = rows[0]?.sautorespond || '';
+ttl = rows[0]?.memory_ttl ?? 86400;
+} catch (e) {
+console.error("[❌] Error obteniendo prompt/ttl:", e.message);
+}
+
+if (!systemPrompt) {
+systemPrompt = await fetch('https://raw.githubusercontent.com/crxsmods/Text2/refs/heads/main/text-chatgpt').then(r => r.text());
+//await fetch('https://raw.githubusercontent.com/Skidy89/chat-gpt-jailbreak/main/Text.txt').then(r => r.text());
+}
+
+try {
+const res = await db.query('SELECT history, updated_at FROM chat_memory WHERE chat_id = $1', [chatId]);
+const { history = [], updated_at } = res.rows[0] || {};
+const expired = !ttl || (updated_at && Date.now() - new Date(updated_at) > ttl * 1000);
+memory = expired ? [] : history;
+} catch (e) {
+console.error("❌ No se pudo obtener memoria de DB:", e.message);
+}
+
+if (!memory.length || memory[0]?.role !== 'system' || memory[0]?.content !== systemPrompt) {
+memory = [{ role: 'system', content: systemPrompt }];
+}
+
+memory.push({ role: 'user', content: query });
+if (memory.length > MAX_TURNS * 2 + 1) {
+memory = [memory[0], ...memory.slice(-MAX_TURNS * 2)];
+}
+
+let result = '';
+try {
+const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${GROQ_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: text }
+    ],
+    temperature: 0.9,
+    max_tokens: 600
+  })
+});
+const data = await groq.json();
+result = data.choices?.[0]?.message?.content?.trim() || `uy ${m.pushName} me colgué un segundo 😵‍💫 dame otra chance crack`;
+} catch (e) {
+try {
+let gpt = await fetch(`${info.apis}/ia/gptprompt?text=${memory}?&prompt=${systemPrompt}`);
+let res = await gpt.json();
+result = res.data;
+} catch (err) {
+result = await exoml.generate(memory, systemPrompt, 'llama-4-scout');
 }}
 
-async function perplexityIA(q, logic) {
-      try {
-        let response = await perplexity.chat([
-          { role: 'system', content: logic || syms1 },
-          { role: 'user', content: q }
-        ], 'sonar-pro');
-        if (response.status) {
-          return response.result.response;
-        } else {
-          throw new Error(`Error en Perplexity: ${response.result.error}`);
-        }
-      } catch (error) {
-        console.error('Error en Perplexity:', error);
-        return null;
-      }
-    }
-
-let query = m.text;
-let username = `${m.pushName}`;
-let txtDefault = await fetch('https://raw.githubusercontent.com/crxsmods/text/refs/heads/main/text-chatgpt').then(v => v.text());
-//await fetch('https://raw.githubusercontent.com/Skidy89/chat-gpt-jailbreak/main/Text.txt').then(v => v.text());
-let syms1 = chat.sAutorespond ? chat.sAutorespond : txtDefault
-
-if (!chat.autorespond) return 
-if (m.fromMe) return
-let result
-if (!result || result.trim().length === 0) {
-result = await perplexityIA(query, syms1);
-}
-    
-if (!result || result.trim().length === 0) {
-result = await luminsesi(query, username, syms1);
-result = result.replace(/Maaf, terjadi kesalahan saat memproses permintaan Anda/g, '').trim();
-result = result.replace(/Generated by BLACKBOX\.AI.*?https:\/\/www\.blackbox\.ai/g, '').trim();
-result = result.replace(/and for API requests replace https:\/\/www\.blackbox\.ai with https:\/\/api\.blackbox\.ai/g, '').trim();
+if (!result || result.trim().length < 2) result = "🤖 ...";
+memory.push({ role: 'assistant', content: result });
+try {
+await db.query(`INSERT INTO chat_memory (chat_id, history, updated_at)
+      VALUES ($1, $2, NOW())
+      ON CONFLICT (chat_id) DO UPDATE SET history = $2, updated_at = NOW()
+    `, [chatId, JSON.stringify(memory)]);
+} catch (e) {
+console.error("❌ No se pudo guardar memoria:", e.message);
 }
 
-if (result && result.trim().length > 0) {
-await this.reply(m.chat, result, m);
-await this.readMessages([m.key])
-} else {
-let gpt = await fetch(`${apis}/ia/gptprompt?text=${m.text}?&prompt=${syms1}`) 
-let res = await gpt.json()
-await this.reply(m.chat, res.data, m)
-}}
-return true;
-}
+const formatted = formatForWhatsApp(result)
+return await conn.reply(m.chat, formatted, m)
+//await conn.reply(m.chat, result, m);
+await conn.readMessages([m.key]);
 
-//export default handler;
+return false;
+}

@@ -5,5 +5,6 @@ await conn.groupLeave(id)}
 handler.help = ["leave"]
 handler.tags = ["owner"]
 handler.command = /^(salir|leavegc|salirdelgrupo|leave)$/i
-handler.rowner = true
+handler.owner = true
+handler.register = true
 export default handler

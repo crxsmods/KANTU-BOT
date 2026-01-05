@@ -2,127 +2,156 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
-import translate from '@vitalets/google-translate-api';
-import { perplexity } from '../lib/scraper.js';
-import { Configuration, OpenAIApi } from "openai";
+import { blackboxAi, exoml, perplexity } from '../lib/scraper.js';
+import { db } from '../lib/postgres.js';
+ 
+let GROQ_API_KEY_CACHE = null;
 
-const apikey_base64 = "c2stcHJvai1tUzN4bGZueXo0UjBPWV8zbm1DVDlMQmlmYXhYbVdaa0ptUVFJMDVKR2FxdHZCbk9ncWZjRXdCbEJmMU5WN0lYa0pncVJuM3BNc1QzQmxia0ZKMVJ5aEJzUl93NzRXbll5LWdjdkowT0NQUXliWTBOcENCcDZIOTlCVVVtcWxuTjVraEZxMk43TGlMU0RsU0s1cXA5Tm1kWVZXc0E=";
+async function getGroqKey() {
+  if (GROQ_API_KEY_CACHE) return GROQ_API_KEY_CACHE;
 
-const apikey = Buffer.from(apikey_base64, 'base64').toString('utf-8');
-const configuration = new Configuration({apiKey: apikey, 
-});
-const openai = new OpenAIApi(configuration);
+  const { rows } = await db.query(
+    "SELECT token_b64 FROM api_tokens WHERE name = $1",
+    ["groq"]
+  );
+
+  if (!rows.length) throw new Error("Token GROQ no encontrado");
+
+  GROQ_API_KEY_CACHE = Buffer
+    .from(rows[0].token_b64, "base64")
+    .toString("utf8");
+
+  return GROQ_API_KEY_CACHE;
+}
+
+const GROQ_API_KEY = await getGroqKey();
 
 const handler = async (m, {conn, text, usedPrefix, command}) => {
-let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
-let pp = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://telegra.ph/file/9d38415096b6c46bf03f8.jpg')
-if (!text) return m.reply(await tr(`*Hola cómo esta 😊, El que te puedo ayudar?*, ingrese una petición o orden para usar la función de chagpt\n*Ejemplo:*\n${usedPrefix + command} Recomienda un top 10 de películas de acción`)) 
-let syms1 = await fetch('https://raw.githubusercontent.com/crxsmods/text3/refs/heads/main/text-chatgpt').then(v => v.text());
+let username = m.pushName 
+if (!text) return m.reply(`*Hola cómo esta 😊, El que te puedo ayudar?*, ingrese una petición o orden para usar la función de chagpt\n*Ejemplo:*\n${usedPrefix + command} Recomienda un top 10 de películas de acción`) 
+let syst = `Actuaras como un Bot de WhatsApp el cual fue creado por CrxsMods, tu seras KantuBot.`
+let syms1 = await fetch('https://raw.githubusercontent.com/crxsmods/text5/refs/heads/main/text-chatgpt').then(v => v.text());
+ 
+const chatId = m.chat;
+let systemPrompt = '';
+let ttl = 86400; // 1 día por defecto
+let memory = [];
+
+try {
+const { rows } = await db.query('SELECT sautorespond, memory_ttl FROM group_settings WHERE group_id = $1', [chatId]);
+systemPrompt = rows[0]?.sautorespond || '';
+ttl = rows[0]?.memory_ttl ?? 86400;
+} catch (e) {
+console.error("❌ Error obteniendo prompt o TTL:", e.message);
+}
+
+if (!systemPrompt) {
+try {
+systemPrompt = await fetch('https://raw.githubusercontent.com/crxsmods/text3/refs/heads/main/text-chatgpt').then(r => r.text());
+} catch {
+systemPrompt = syms1; 
+}}
+
+try {
+const res = await db.query('SELECT history, updated_at FROM chat_memory WHERE chat_id = $1', [chatId]);
+const { history = [], updated_at } = res.rows[0] || {};
+const expired = !ttl || (updated_at && Date.now() - new Date(updated_at) > ttl * 1000);
+memory = expired ? [] : history;
+} catch (e) {
+console.error("❌ Error leyendo memoria:", e.message);
+}
+
+if (!memory.length || memory[0]?.role !== 'system' || memory[0]?.content !== systemPrompt) {
+  memory = [{ role: 'system', content: systemPrompt }];
+}
+memory.push({ role: 'user', content: text });
+if (memory.length > 25) memory = [memory[0], ...memory.slice(-24)];
 
 if (command == 'ia' || command == 'chatgpt') {
 await conn.sendPresenceUpdate('composing', m.chat)
+let result = '';
 try {
-  // Usar la nueva API solicitada
-  const encodedPrompt = encodeURIComponent(syms1);
-  const encodedContent = encodeURIComponent(text);
-  let gpt = await fetch(`https://api.siputzx.my.id/api/ai/gpt3?prompt=${encodedPrompt}&content=${encodedContent}`);
-  let res = await gpt.json();
-  
-  if (res.status) {
-    await m.reply(res.data);
-  } else {
-    // Si falla, intentar con los respaldos originales
-    throw new Error("API principal falló");
-  }
+//modelo2 llama-3.3-70b-versatile
+//modelo3 moonshotai/kimi-k2-instruct-0905
+//modelo4 meta-llama/llama-4-maverick-17b-128e-instruct
+//modelo5 llama-3.1-8b-instant
+//modelo6 openai/gpt-oss-120b
+const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${GROQ_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    model: "moonshotai/kimi-k2-instruct-0905",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: text }
+    ],
+    temperature: 0.9,
+    max_tokens: 600
+  })
+});
+const data = await groq.json();
+result = data.choices?.[0]?.message?.content?.trim() || `uy ${m.pushName} me colgué un segundo 😵‍💫 dame otra chance crack`;
+//result = await exoml.generate(memory, systemPrompt, 'llama-4-scout');
+} catch (e) {
+try {
+let gpt = await fetch(`${info.apis}/ia/gptprompt?text=${text}?&prompt=${systemPrompt}`);
+let res = await gpt.json();
+result = res.data;
 } catch {
-  try {     
-    const messages = [{ role: 'system', content: syms1 },
-    { role: 'user', content: text }];
-
-    const chooseModel = (query) => {
-    const lowerText = query.toLowerCase();
-
-    if (lowerText.includes('código') || lowerText.includes('programación') || lowerText.includes('code') || lowerText.includes('script')) {
-      return 'codellama-70b-instruct';
-    } else if (lowerText.includes('noticias') || lowerText.includes('actual') || lowerText.includes('hoy') || lowerText.includes('último')) {
-      return 'sonar-medium-online';
-    } else if (lowerText.includes('explica') || lowerText.includes('por qué') || lowerText.includes('razona') || lowerText.includes('analiza')) {
-      return 'sonar-reasoning-pro';
-    } else if (lowerText.includes('cómo') || lowerText.includes('paso a paso') || lowerText.includes('instrucciones')) {
-      return 'mixtral-8x7b-instruct';
-    } else if (lowerText.includes('charla') || lowerText.includes('habla') || lowerText.includes('dime')) {
-      return 'sonar-medium-chat';
-    } else {
-      return 'sonar-pro';
-    }};
-
-    const selectedModel = chooseModel(text);
-    const fallbackModels = Object.keys(perplexity.api.models).filter(m => m !== selectedModel);
-    let response = await perplexity.chat(messages, selectedModel);
-
-    if (!response.status) {
-      for (const fallback of fallbackModels) {
-        try {
-          response = await perplexity.chat(messages, fallback);
-          if (response.status) {
-            break;
-          }
-        } catch (e) {
-          console.error(`Falló ${fallback}: ${e.message}`);
-        }
-      }
-    }
-
-    if (response.status) {
-      await m.reply(response.result.response);
-    } else {
-      throw new Error("Perplexity falló");
-    }
-  } catch {
-    try {     
-      async function getResponse(prompt) {
-        try {
-          await delay(1000); 
-          const response = await axios.post('https://api.openai.com/v1/chat/completions', 
-          { model: 'gpt-4o-mini', 
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 300,
-          }, { headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apikey}`, 
-          }});
-          return response.data.choices[0].message.content;
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      const respuesta = await getResponse(text);
-      m.reply(respuesta);
-    } catch {
-      try { 
-        let gpt = await fetch(`${apis}/ia/gptprompt?text=${text}?&prompt=${syms1}`);
-        let res = await gpt.json();
-        await m.reply(res.data);
-      } catch {
-        try {
-          let gpt = await fetch(`${apis}/ia/gptweb?text=${text}`);
-          let res = await gpt.json();
-          await m.reply(res.gpt);
-        } catch {
-          m.reply("Lo siento, todos los servicios de IA están fallando en este momento. Inténtalo más tarde.");
-        }
-      }
-    }
-  }
+result = "❌ No se pudo generar una respuesta.";
 }}
+memory.push({ role: 'assistant', content: result });
 
-if (command == 'openai' || command == 'ia2' || command == 'chatgpt2') {
-conn.sendPresenceUpdate('composing', m.chat);
-let gpt = await fetch(`${apis}/api/ia2?text=${text}`)
+try {
+await db.query(`INSERT INTO chat_memory (chat_id, history, updated_at)
+      VALUES ($1, $2, NOW())
+      ON CONFLICT (chat_id) DO UPDATE SET history = $2, updated_at = NOW()
+    `, [chatId, JSON.stringify(memory)]);
+} catch (e) {
+console.error("❌ No se pudo guardar memoria:", e.message);
+}
+return await m.reply(result);
+}
+
+if (command == 'openai'  || command == 'chatgpt2') {
+await conn.sendPresenceUpdate('composing', m.chat);
+try {
+let gpt = await fetch(`https://api.dorratz.com/ai/gpt?prompt=${text}`) 
+let res = await gpt.json()
+const decoded = JSON.parse(`"${res.result}"`);
+await m.reply(decoded);
+} catch {
+try { 
+let gpt = await fetch(`${info.apis}/ia/gptweb?text=${text}`) 
 let res = await gpt.json()
 await m.reply(res.gpt)
-}
+} catch {
+try {
+let gpt = await fetch(`${info.apis}/api/ia2?text=${text}`)
+let res = await gpt.json()
+await m.reply(res.gpt)
+} catch {
+try {
+let gpt = await fetch(`${info.apis}/ia/chatgpt?q=${text}`)
+let res = await gpt.json()
+await m.reply(res.data)
+} catch (e) {
+}}}}}
+
+if (command == 'deepseek') {
+await conn.sendPresenceUpdate('composing', m.chat);
+try {
+const gpt = await fetch(`https://api.dorratz.com/ai/deepseek?prompt=${encodeURIComponent(text)}`);
+const res = await gpt.json();
+const decoded = JSON.parse(`"${res.result}"`);
+await m.reply(decoded);
+} catch (e) {
+console.error('Error DeepSeek:', e);
+await m.reply('❌ Error al consultar DeepSeek API.');
+}}
 
 if (command == 'gemini') {
 await conn.sendPresenceUpdate('composing', m.chat)
@@ -132,12 +161,18 @@ let res = await gpt.json()
 await m.reply(res.message)
 } catch {
 try {
-let gpt = await fetch(`${apis}/ia/gemini?query=${text}`)
+let gpt = await fetch(`https://delirius-apiofc.vercel.app/ia/gemini?query=${text}`)
 let res = await gpt.json()
 await m.reply(res.message)
 } catch {
 }}}
 
+if (command === 'blackbox') {
+const result = await blackboxAi(text);
+if (result.status) return await m.reply(result.data.response);
+return await m.reply("❌ Error de blackbox.ai: " + result.error);
+}
+    
 if (command == 'copilot' || command == 'bing') {
 await conn.sendPresenceUpdate('composing', m.chat)
 try {
@@ -146,23 +181,24 @@ let res = await gpt.json()
 await conn.sendMessage(m.chat, { text: res.result.ai_response, contextInfo: {
 externalAdReply: {
 title: "[ IA COPILOT ]",
-body: wm,
+body: "KantuBot",
 thumbnailUrl: "https://qu.ax/nTDgf.jpg", 
-sourceUrl: [nna, nna2, nn, md, yt, tiktok].getRandom(),
+sourceUrl: "https://dash.swallox.com",
 mediaType: 1,
 showAdAttribution: false,
 renderLargerThumbnail: false
 }}}, { quoted: m })
+//m.reply(res.result.ai_response)
 } catch {
 try {
-let gpt = await fetch(`${apis}/ia/bingia?query=${text}`)
+let gpt = await fetch(`${info.apis}/ia/bingia?query=${text}`)
 let res = await gpt.json()
 await m.reply(res.message)
 } catch {
 }}}}
-handler.help = ["chagpt", "ia", "openai", "gemini", "copilot"]
+handler.help = ["chagpt", "ia", "openai", "gemini", "copilot", "blackbox", "deepseek"]
 handler.tags = ["buscadores"]
-handler.command = /^(openai|chatgpt|ia|ai|openai2|chatgpt2|ia2|gemini|copilot|bing)$/i;
+handler.command = /^(openai|chatgpt|ia|ai|openai2|chatgpt2|ia2|gemini|copilot|bing|deepseek|blackbox)$/i;
 export default handler;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

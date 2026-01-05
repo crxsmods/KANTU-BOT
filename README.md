@@ -26,7 +26,7 @@
 
 <a href="http://wa.me/5217121649714" target="blank"><img src="https://img.shields.io/badge/Creador-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" /> 
 
-<a href="http://wa.me/5216612869463?text=.estado" target="blank"><img src="https://img.shields.io/badge/Bot oficial-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
+<a href="http://wa.me/5215646254697?text=.estado" target="blank"><img src="https://img.shields.io/badge/Bot oficial-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
 </a>
 
 <p align="center">
@@ -102,13 +102,6 @@ npm start
 ```
 
 -----
-### ⚡ ACTIVA EL REPLIT
-<a target="_blank" href="https://replit.com/github/crxsmods/KANTU-BOT"><img alt="Run on Replit" src="https://binbashbanana.github.io/deploy-buttons/buttons/remade/replit.svg"></a>
-<a href="https://replit.com/github/crxsmods/KANTU-BOT"> <img src="https://media0.giphy.com/media/lMwu8EJAnv9kmn51KQ/giphy.gif" height="29px"></a>
-------------------
-- [x] Resultado <details><summary>Importar Repositorio - KANTU-BOT</summary><img src="https://i.imgur.com/GQyRnMf.jpg"></details>
-----  
----
 
 ## 🚀 Uso y Comandos <a name="usage"></a>
 
@@ -131,9 +124,9 @@ Y muchos Comandos Mas
 
 - [x] Soporte básico multimedia
 - [x] Panel web interactivo
-- [ ] Integración con bases de datos externas
+- [x] Integración con bases de datos externas
 - [ ] Notificaciones push móviles
-- [ ] Analítica avanzada con gráficos en tiempo real
+- [x] Analítica avanzada con gráficos en tiempo real
 
 ---
 

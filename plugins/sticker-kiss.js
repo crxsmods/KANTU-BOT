@@ -2,9 +2,10 @@ import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn }) => {
-  try {
+try {
 if (m.quoted?.sender) m.mentionedJid.push(m.quoted.sender)
 if (!m.mentionedJid.length) m.mentionedJid.push(m.sender)
+
 let getName = async (jid) => {
 let name = await conn.getName(jid).catch(() => null)
 return name || `+${jid.split('@')[0]}`
@@ -15,10 +16,13 @@ let mentionedNames = await Promise.all(m.mentionedJid.map(getName))
 let res = await fetch('https://nekos.life/api/kiss')
 let json = await res.json()
 let { url } = json
-let stickerMessage = await sticker(null, url, `${senderName} está besando a ${mentionedNames.join(', ')}`)
-conn.sendFile(m.chat, stickerMessage, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${senderName} está besando a ${mentionedNames.join(', ')}`, body: wm, mediaType: 2, sourceUrl: [nna, nn, md, yt].getRandom(), thumbnail: imagen4}}}, { quoted: m })
-//conn.sendFile(m.chat, stickerMessage, null, { asSticker: true })
-} catch (e) {
+let texto = `💋 ${senderName} está besando a ${mentionedNames.join(', ')}`
+try {
+let stickerMessage = await sticker(null, url, texto)
+await conn.sendFile(m.chat, stickerMessage, 'sticker.webp', '', m, true, { contextInfo: { forwardingScore: 200, isForwarded: false, externalAdReply: { showAdAttribution: false, title: texto, body: info.wm, mediaType: 2, sourceUrl: info.md, thumbnail: m.pp }}}, { quoted: m })
+} catch (err) {
+await conn.sendMessage(m.chat, { video: { url: url }, gifPlayback: true, caption: texto, mentions: m.mentionedJid }, { quoted: m })
+}} catch (e) {
 console.error(e)
 }}
 handler.help = ['kiss']

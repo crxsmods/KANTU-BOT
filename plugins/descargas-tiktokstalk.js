@@ -1,9 +1,9 @@
 import fg from 'api-dylux'
 let handler = async (m, { conn, text, args }) => {
-if (!text) throw `✳️ Ingrese el Username de un usuario de TikTok`
+if (!text) return m.reply(`✳️ Ingrese el Username de un usuario de TikTok`)
 m.react("⌛");
 try {
-const apiUrl = `${apis}/tools/tiktokstalk?q=${encodeURIComponent(args[0])}`;
+const apiUrl = `${info.apis}/tools/tiktokstalk?q=${encodeURIComponent(args[0])}`;
 const apiResponse = await fetch(apiUrl);
 const delius = await apiResponse.json();
 if (!delius || !delius.result || !delius.result.users) return m.react("❌");
@@ -21,7 +21,7 @@ const txt = `👤 *Perfil de TikTok*:
 *• URL*: 
 ${profile.url}`;
 
-await conn.sendFile(m.chat, profile.avatarLarger, 'tt.png', txt, m, null, fake);
+await conn.sendFile(m.chat, profile.avatarLarger, 'tt.png', txt, m);
 m.react("✅");
 } catch (e2) {
 try {
@@ -33,7 +33,7 @@ try {
 *• Siguiendo:* ${res.following}
 *• Desc:* ${res.desc}
 *• Link* : https://tiktok.com/${res.username}`
-await conn.sendFile(m.chat, res.profile, 'tt.png', txt, m, null, fake)
+await conn.sendFile(m.chat, res.profile, 'tt.png', txt, m)
 m.react("✅");
 } catch (e) {
 await m.react(`❌`) 
@@ -42,7 +42,7 @@ console.log(e)
 }}}
 handler.help = ['tiktokstalk']
 handler.tags = ['downloader']
-handler.command = /^t(tstalk|iktokstalk|iktoksearch|tsearch)$/i
+handler.command = /^t(tstalk|iktokstalk)$/i
 handler.register = true
 handler.limit = 1
 export default handler
