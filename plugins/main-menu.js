@@ -28,9 +28,9 @@ const tags = {
 }
 
 const defaultMenu = {
-  before: `> 「 %wm 」
+  before: `> ⭐ B0T PÚBLICO ⭐
  
- ╰┈➤  𝐊𝐚𝐧𝐭𝐮 - 𝐁𝐨𝐭
+ ╰┈➤  𝐊𝐚𝐧𝐭𝐮 - 𝐁𝐨𝐭 
  
 ┏──────────────
 ┊ 『 Info User 』
@@ -191,7 +191,7 @@ const handler = async (m, { conn, usedPrefix: _p, args }) => {
         externalAdReply: { 
           showAdAttribution: false, 
           renderLargerThumbnail: false, 
-          title: "『 𝑲𝑨𝑵𝑻𝑼 - 𝑩𝑶𝑻 』", 
+          title: "『 Kantu - Public 』", 
           body: `${nombreBot} (${tipo})`, 
           mediaType: 1, 
           thumbnailUrl: global.info?.img2, 
