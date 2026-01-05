@@ -130,7 +130,7 @@ handler.before = async (m, { conn, usedPrefix }) => {
 
       // 4. Notificación al Canal (Newsletter)
       await conn.sendMessage("120363371008200788@newsletter", { 
-        text: `◉ *Usuarios:* ${m.pushName || 'Anónimo'} ${userNationality ? `\n◉ *País:* ${userNationality}` : ''}\n◉ *Verificación:* ${nombre}\n◉ *Edad:* ${edad} años\n◉ *Fecha:* ${date}\n◉ *Bot:* wa.me/5216612869463?text=/code\n◉ *Número de serie:*\n⤷ ${serial}`,
+        text: `◉ *Usuarios:* ${m.pushName || 'Anónimo'} ${userNationality ? `\n◉ *País:* ${userNationality}` : ''}\n◉ *Verificación:* ${nombre}\n◉ *Edad:* ${edad} años\n◉ *Fecha:* ${date}\n◉ *Bot:* wa.me/5215646254697?text=/code\n◉ *Número de serie:*\n⤷ ${serial}`,
         contextInfo: { 
           externalAdReply: {
             title: "『 𝙉𝙊𝙏𝙄𝙁𝙄𝘾𝘼𝘾𝙄𝙊́𝙉 📢 』",
