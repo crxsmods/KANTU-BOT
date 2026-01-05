@@ -84,7 +84,7 @@ const [{ total }] = (await db.query(`SELECT SUM(count)::int AS total FROM stats`
 const comandosEjecutados = total || 0;
 const sistema = await getSystemInfo();
 
-const teks = `*≡ INFOBOT*
+const teks = `*≡ INFOBOT (PÚBLICO)*
 
 *INFORMACIÓN*
 *▣ Grupos total:* ${totalGrupos}
