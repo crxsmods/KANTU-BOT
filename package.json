@@ -6,7 +6,8 @@
     "start": "node --max-old-space-size=512 index.js",
     "dev": "node index.js",
     "db:check": "node scripts/check-database.js",
-    "db:backup": "node scripts/export-database.js"
+    "db:backup": "node scripts/export-database.js",
+    "db:diagnose": "node scripts/diagnose-database-url.js"
   },
   "dependencies": {
     "@bochilteam/scraper": "^5.0.1",
