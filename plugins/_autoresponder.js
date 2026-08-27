@@ -9,15 +9,22 @@ const MAX_TURNS = 12;
 
 let GROQ_API_KEY_CACHE = null;
 
+// Lazy: NO se consulta nada al cargar el módulo. Se busca primero en
+// process.env y, solo como respaldo, en la tabla api_tokens.
 async function getGroqKey() {
   if (GROQ_API_KEY_CACHE) return GROQ_API_KEY_CACHE;
+
+  if (process.env.GROQ_API_KEY) {
+    GROQ_API_KEY_CACHE = process.env.GROQ_API_KEY;
+    return GROQ_API_KEY_CACHE;
+  }
 
   const { rows } = await db.query(
     "SELECT token_b64 FROM api_tokens WHERE name = $1",
     ["groq"]
   );
 
-  if (!rows.length) throw new Error("Token GROQ no encontrado");
+  if (!rows.length) throw new Error("Token GROQ no encontrado (ni en .env ni en api_tokens)");
 
   GROQ_API_KEY_CACHE = Buffer
     .from(rows[0].token_b64, "base64")
@@ -25,8 +32,6 @@ async function getGroqKey() {
 
   return GROQ_API_KEY_CACHE;
 }
-
-const GROQ_API_KEY = await getGroqKey();
 
 export async function before(m, { conn }) {
 const botIds = [conn.user?.id, conn.user?.lid].filter(Boolean).map(j => j.split('@')[0].split(':')[0]);
@@ -97,6 +102,7 @@ memory = [memory[0], ...memory.slice(-MAX_TURNS * 2)];
 
 let result = '';
 try {
+const GROQ_API_KEY = await getGroqKey();
 const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
   method: "POST",
   headers: {

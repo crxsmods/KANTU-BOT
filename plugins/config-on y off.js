@@ -1,5 +1,5 @@
 import { db } from '../lib/postgres.js'
-import { getSubbotConfig } from '../lib/postgres.js'
+import { getSubbotConfig, invalidateSubbotConfig } from '../lib/postgres.js'
 
 const handler = async (m, { conn, args, usedPrefix, command, isAdmin, isOwner }) => {
 const isEnable = /true|enable|(turn)?on|1/i.test(command)
@@ -11,6 +11,7 @@ const isSubbot = botId !== 'main'
 let isAll = false, isUser = false
 let res = await db.query('SELECT * FROM group_settings WHERE group_id = $1', [chatId]);
 let chat = res.rows[0] || {};
+const subbotConfig = isSubbot ? await getSubbotConfig(botId) : null;
 
 // Indicadores visuales más limpios
 const getStatus = (flag) => m.isGroup ? (chat[flag] ? '🟢' : '🔴') : '🚫';
@@ -47,10 +48,10 @@ menu += `🔹 *Solo Admins* | ${getStatus('modoadmin')}
 \n\n`
 
 menu += `「 👑 *AJUSTES DE DUEÑO* 」\n`
-menu += `🔸 *Antiprivado* | ${isSubbot ? (getSubbotConfig(botId).antiPrivate ? '🟢' : '🔴') : '🚫'}
+menu += `🔸 *Antiprivado* | ${isSubbot ? (subbotConfig?.anti_private ? '🟢' : '🔴') : '🚫'}
 ↳ _${usedPrefix + command} antiprivate_
 \n`
-menu += `🔸 *Antillamadas* | ${isSubbot ? (getSubbotConfig(botId).anticall ? '🟢' : '🔴') : '🚫'}
+menu += `🔸 *Antillamadas* | ${isSubbot ? (subbotConfig?.anti_call ? '🟢' : '🔴') : '🚫'}
 ↳ _${usedPrefix + command} anticall_`
 // --- FIN DEL MENÚ ---
 
@@ -116,6 +117,7 @@ if (!isSubbot && !isOwner) return m.reply('「❌」 *Esta configuración es exc
 await db.query(`INSERT INTO subbots (id, anti_private)
     VALUES ($1, $2)
     ON CONFLICT (id) DO UPDATE SET anti_private = $2`, [cleanId, isEnable]);
+invalidateSubbotConfig(cleanId);
 isAll = true;
 break;
 
@@ -124,6 +126,7 @@ if (!isSubbot && !isOwner) return m.reply('「❌」 *Esta configuración es exc
 await db.query(`INSERT INTO subbots (id, anti_call)
     VALUES ($1, $2)
     ON CONFLICT (id) DO UPDATE SET anti_call = $2`, [cleanId, isEnable]);
+invalidateSubbotConfig(cleanId);
 isAll = true;
 break;
 

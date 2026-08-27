@@ -1,4 +1,4 @@
-import { db } from '../lib/postgres.js'
+import { db, invalidateSubbotConfig } from '../lib/postgres.js'
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
 const val = args[0];
@@ -13,6 +13,7 @@ const privacyVal = val === '1';
 const res = await db.query(`INSERT INTO subbots (id, privacy)
         VALUES ($1, $2)
         ON CONFLICT (id) DO UPDATE SET privacy = $2 RETURNING privacy`, [botId, privacyVal]);
+invalidateSubbotConfig(botId);
 return m.reply(privacyVal ? '✅ *Privacidad activada.*\n> Tu número no se mostrará en la lista de bots.' : '✅ *Privacidad desactivada.*\n> Tu número se mostrará en la lista de bots.');
 }
 
@@ -21,6 +22,7 @@ const prestarVal = val === '1';
 const res = await db.query(`INSERT INTO subbots (id, prestar)
         VALUES ($1, $2)
         ON CONFLICT (id) DO UPDATE SET prestar = $2 RETURNING prestar`, [botId, prestarVal]);
+invalidateSubbotConfig(botId);
 return m.reply(prestarVal ? '✅ *Prestar bot activado.*\n> Los usuarios pueden usar el bot para unirlo a grupos.' : '✅ *Prestar bot desactivado.*\n> Los usuarios no podrán unir el bot a grupos.');
 }} catch (err) {
 console.error(err);

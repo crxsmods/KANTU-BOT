@@ -7,15 +7,22 @@ import { db } from '../lib/postgres.js';
  
 let GROQ_API_KEY_CACHE = null;
 
+// Lazy: NO se consulta nada al cargar el módulo. Se busca primero en
+// process.env y, solo como respaldo, en la tabla api_tokens.
 async function getGroqKey() {
   if (GROQ_API_KEY_CACHE) return GROQ_API_KEY_CACHE;
+
+  if (process.env.GROQ_API_KEY) {
+    GROQ_API_KEY_CACHE = process.env.GROQ_API_KEY;
+    return GROQ_API_KEY_CACHE;
+  }
 
   const { rows } = await db.query(
     "SELECT token_b64 FROM api_tokens WHERE name = $1",
     ["groq"]
   );
 
-  if (!rows.length) throw new Error("Token GROQ no encontrado");
+  if (!rows.length) throw new Error("Token GROQ no encontrado (ni en .env ni en api_tokens)");
 
   GROQ_API_KEY_CACHE = Buffer
     .from(rows[0].token_b64, "base64")
@@ -23,8 +30,6 @@ async function getGroqKey() {
 
   return GROQ_API_KEY_CACHE;
 }
-
-const GROQ_API_KEY = await getGroqKey();
 
 const handler = async (m, {conn, text, usedPrefix, command}) => {
 let username = m.pushName 
@@ -76,6 +81,7 @@ try {
 //modelo4 meta-llama/llama-4-maverick-17b-128e-instruct
 //modelo5 llama-3.1-8b-instant
 //modelo6 openai/gpt-oss-120b
+const GROQ_API_KEY = await getGroqKey();
 const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
   method: "POST",
   headers: {

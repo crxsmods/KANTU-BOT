@@ -5,7 +5,7 @@ import path from "path";
 import chalk from "chalk";
 import { fileURLToPath, pathToFileURL } from "url";
 import crypto from "crypto";
-import { db, getSubbotConfig } from "./lib/postgres.js";
+import { db, getSubbotConfig, invalidateSubbotConfig } from "./lib/postgres.js";
 import { logCommand, logError, logMessage, LogLevel } from "./lib/logger.js";
 import { smsg } from "./lib/simple.js";
 
@@ -312,9 +312,13 @@ function cleanJid(jid = "") {
 
 const chatId = m.key?.remoteJid || "";
 const botId = conn.user?.id;
-const subbotConf = await getSubbotConfig(botId)
-info.wm = subbotConf.name ?? info.wm;
-info.img2 = subbotConf.logo_url ?? info.img2;
+// Consultamos la config del subbot UNA sola vez por mensaje (getSubbotConfig
+// ya tiene su propio cache interno con TTL ~10s, así que llamadas repetidas
+// dentro de la misma ventana son gratis, pero igual reutilizamos la misma
+// variable en todo el handler para evitar múltiples round-trips).
+const botConfig = await getSubbotConfig(botId);
+info.wm = botConfig.name ?? info.wm;
+info.img2 = botConfig.logo_url ?? info.img2;
 
 try {
 await db.query(`INSERT INTO chats (id, is_group, timestamp, bot_id, joined)
@@ -324,11 +328,11 @@ await db.query(`INSERT INTO chats (id, is_group, timestamp, bot_id, joined)
 console.error(err);
 }
 
-const botConfig = await getSubbotConfig(botId)
 const isMainBot = conn === globalThis.conn;
 const botType = isMainBot ? "oficial" : "subbot";
 if (botConfig.tipo !== botType) {
 await db.query(`UPDATE subbots SET tipo = $1 WHERE id = $2`, [botType, botId.replace(/:\d+/, "")]);
+invalidateSubbotConfig(botId);
 }
 const prefijo = Array.isArray(botConfig.prefix) ? botConfig.prefix : [botConfig.prefix];
 const modo = botConfig.mode || "public";
@@ -448,7 +452,7 @@ const fixedOwners = [
 ];
 const isCreator = fixedOwners.includes(m.sender) || 
   global.owner.map(([v]) => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender);
-const config = await getSubbotConfig(botId);
+const config = botConfig; // reutilizamos la misma config ya obtenida arriba (evita otra query)
 let isOwner = isCreator || senderJid === botJid || (config.owners || []).includes(senderJid);
 
 let metadata = { participants: [] };
@@ -546,13 +550,8 @@ console.error("❌ Error actualizando lid en handler:", e);
 console.error(err);
 }
 
-try {
-await db.query(`INSERT INTO chats (id)
-      VALUES ($1)
-      ON CONFLICT (id) DO NOTHING`, [chatId]);
-} catch (err) {
-console.error(err);
-}
+// (Se removió un INSERT INTO chats(id) redundante: la fila ya fue creada/
+// actualizada más arriba con el INSERT ... ON CONFLICT DO UPDATE completo.)
 
 const plugins = Object.values(global.plugins || {});
 
@@ -696,18 +695,16 @@ if (plugin.admin && !isAdmin) return m.reply("「 ꛕ 」 No eres admins. Solo l
 if (plugin.botAdmin && !isBotAdmin) return m.reply(`「 ꛕ 」 Necesito ser admin para poder usar este comando.`);
 if (plugin.group && !isGroup) return m.reply("「 ꛕ 」 Este comando es solo para grupos.");
 if (plugin.private && isGroup) return m.reply("「 ꛕ 」 Vamos al privado, este comando solo funciona en el privado del bot. ¡Hablemos en privado! 🤫");
+// Reutilizamos m.user (ya obtenido por smsg() al inicio del handler) en vez
+// de volver a consultar la tabla usuarios por separado para cada chequeo.
+const cachedUser = m.user || {};
+
 if (plugin.register) {
-try {
-const result = await db.query('SELECT * FROM usuarios WHERE id = $1', [m.sender]);
-const user = result.rows[0];
-if (!user || user.registered !== true) return m.reply("「🚨」 *¡Hey! no estas registrado, registrese para usar esta función*\n\n*/reg nombre.edad*\n*_❕ Ejemplo_* : */reg Crxs.18*");
-} catch (e) {
-console.error(e);
-}}
+if (!cachedUser || cachedUser.registered !== true) return m.reply("「🚨」 *¡Hey! no estas registrado, registrese para usar esta función*\n\n*/reg nombre.edad*\n*_❕ Ejemplo_* : */reg Crxs.18*");
+}
 
 if (plugin.limit) {
-const res = await db.query('SELECT limite FROM usuarios WHERE id = $1', [m.sender]);
-const limite = res.rows[0]?.limite ?? 0;
+const limite = cachedUser.limite ?? 0;
 
 if (limite < plugin.limit) {
 await m.reply("*⚠ 𝐒𝐮𝐬 𝐝𝐢𝐚𝐦𝐚𝐧𝐭𝐞 💎 𝐬𝐞 𝐡𝐚𝐧 𝐚𝐠𝐨𝐭𝐚𝐝𝐨 𝐩𝐮𝐞𝐝𝐞 𝐜𝐨𝐦𝐩𝐫𝐚𝐫 𝐦𝐚𝐬 𝐮𝐬𝐚𝐧𝐝𝐨 𝐞𝐥 𝐜𝐨𝐦𝐚𝐧𝐝𝐨:* #buy.");
@@ -715,33 +712,27 @@ return;
 }
 
 await db.query('UPDATE usuarios SET limite = limite - $1 WHERE id = $2', [plugin.limit, m.sender]);
+cachedUser.limite = limite - plugin.limit;
 await m.reply(`*${plugin.limit} diamante 💎 usado${plugin.limit > 1 ? 's' : ''}.*`);
 }
 
 if (plugin.money) {
-try {
-const res = await db.query('SELECT money FROM usuarios WHERE id = $1', [m.sender])
-const money = res.rows[0]?.money ?? 0
+const money = cachedUser.money ?? 0;
 
 if (money < plugin.money) {
 return m.reply("*NO TIENE SUFICIENTES SWALLCOINS 🪙*")
 }
 
 await db.query('UPDATE usuarios SET money = money - $1 WHERE id = $2', [plugin.money, m.sender])
+cachedUser.money = money - plugin.money;
 await m.reply(`*${plugin.money} KantuCoins usado${plugin.money > 1 ? 's' : ''} 🪙*`)
-} catch (err) {
-console.error(err)
-}}
+}
 
 if (plugin.level) {
-try {
-const result = await db.query('SELECT level FROM usuarios WHERE id = $1', [m.sender]);
-const nivel = result.rows[0]?.level ?? 0;
+const nivel = cachedUser.level ?? 0;
 
 if (nivel < plugin.level) {
 return m.reply(`*⚠️ 𝐍𝐞𝐜𝐞𝐬𝐢𝐭𝐚 𝐞𝐥 𝐧𝐢𝐯𝐞𝐥 ${plugin.level}, 𝐩𝐚𝐫𝐚 𝐩𝐨𝐝𝐞𝐫 𝐮𝐬𝐚𝐫 𝐞𝐬𝐭𝐞 𝐜𝐨𝐦𝐚𝐧𝐝𝐨, 𝐓𝐮 𝐧𝐢𝐯𝐞𝐥 𝐚𝐜𝐭𝐮𝐚𝐥 𝐞𝐬:* ${nivel}`);
-}} catch (err) {
-console.error(err);
 }}
 
 if (modoAdminActivo && !isAdmin && !isOwner) {
@@ -769,10 +760,12 @@ console.error(e);
 return; 
 }
 
-await db.query(`INSERT INTO stats (command, count)
+// No es crítico para la respuesta al usuario: se guarda en segundo plano
+// sin bloquear el flujo del comando (fire-and-forget con catch).
+db.query(`INSERT INTO stats (command, count)
     VALUES ($1, 1)
     ON CONFLICT (command) DO UPDATE SET count = stats.count + 1
-  `, [command]);
+  `, [command]).catch(err => console.error("❌ Error guardando stats:", err.message));
 
 } catch (err) {
 console.error(chalk.red(`❌ Error al ejecutar ${handler.command}: ${err}`));

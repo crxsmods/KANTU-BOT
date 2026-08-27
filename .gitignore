@@ -7,3 +7,5 @@ BotSession/
 jadibot/
 src/ 
 tmp/
+.env
+backups/

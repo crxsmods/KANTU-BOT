@@ -1,4 +1,4 @@
-import { db, getSubbotConfig } from '../lib/postgres.js';
+import { db, getSubbotConfig, invalidateSubbotConfig } from '../lib/postgres.js';
 
 const handler = async (m, { conn, args, command, usedPrefix }) => {
 const id = conn.user?.id;
@@ -21,6 +21,7 @@ config.owners.push(jidToSave);
 const res = await db.query(`INSERT INTO subbots (id, owners)
         VALUES ($1, $2)
         ON CONFLICT (id) DO UPDATE SET owners = $2 RETURNING owners`, [botId, config.owners]);
+invalidateSubbotConfig(botId);
 console.log(`✅ Owner agregado: ${jidToSave} para ID ${botId}`);
 return m.reply(`✅ Agregado como owner: @${display}`, { mentions: [jidToSave] });
 }
@@ -31,6 +32,7 @@ config.owners = config.owners.filter(j => j !== jidToSave);
 const res = await db.query(`INSERT INTO subbots (id, owners)
         VALUES ($1, $2)
         ON CONFLICT (id) DO UPDATE SET owners = $2 RETURNING owners`, [botId, config.owners]);
+invalidateSubbotConfig(botId);
 console.log(`✅ Owner removido: ${jidToSave} para ID ${botId}`);
 return m.reply(`✅ Removido como owner: @${display}`, { mentions: [jidToSave] });
 }} catch (err) {

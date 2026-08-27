@@ -1,4 +1,4 @@
-import { db, getSubbotConfig } from "../lib/postgres.js";
+import { db, getSubbotConfig, invalidateSubbotConfig } from "../lib/postgres.js";
 
 const handler = async (m, { args, conn, usedPrefix }) => {
 const id = conn.user?.id;
@@ -23,6 +23,7 @@ try {
 const res = await db.query(`INSERT INTO subbots (id, prefix)
          VALUES ($1, $2)
          ON CONFLICT (id) DO UPDATE SET prefix = $2 RETURNING prefix`, [cleanId, [""]]);
+invalidateSubbotConfig(cleanId);
 return m.reply(`✅ Ahora el bot funciona *sin prefijo*. Puedes escribir comandos directamente como:\n• \`menu\``);
 } catch (err) {
 console.error(err);
@@ -36,6 +37,7 @@ try {
 const res = await db.query(`INSERT INTO subbots (id, prefix)
        VALUES ($1, $2)
        ON CONFLICT (id) DO UPDATE SET prefix = $2 RETURNING prefix`, [cleanId, lista]);
+invalidateSubbotConfig(cleanId);
 const nuevoTexto = lista.map(p => `\`${p || '(sin prefijo)'}\``).join(", ");
 m.reply(`✅ Prefijos actualizados a: ${nuevoTexto}`);
 } catch (err) {

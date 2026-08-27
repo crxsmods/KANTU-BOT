@@ -1,4 +1,4 @@
-import { db, getSubbotConfig } from "../lib/postgres.js";
+import { db, getSubbotConfig, invalidateSubbotConfig } from "../lib/postgres.js";
 
 const handler = async (m, { args, conn, usedPrefix, command }) => {
 const id = conn.user?.id;
@@ -13,6 +13,7 @@ const res = await db.query(`INSERT INTO subbots (id, mode)
       VALUES ($1, $2)
       ON CONFLICT (id) DO UPDATE SET mode = $2 RETURNING mode
     `, [cleanId, nuevoModo]);
+invalidateSubbotConfig(cleanId);
     
 const estado = nuevoModo === "private" ? "🔒 *Privado*" : "🌐 *Público*";
 m.reply(`✅ Modo cambiado a: ${estado}`);

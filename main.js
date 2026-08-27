@@ -13,6 +13,7 @@ import { startSubBot } from "./lib/subbot.js";
 import "./config.js";
 import { handler, callUpdate, participantsUpdate, groupsUpdate } from "./handler.js";
 import { loadPlugins } from './lib/plugins.js';
+import { dbReady } from './lib/postgres.js';
 const getWidth = () => Math.min(process.stdout.columns || 45, 65) - 4;
 const isMobile = () => (process.stdout.columns || 45) < 55;
 
@@ -85,6 +86,14 @@ const createSimpleBox = (title, lines, color = theme.muted) => {
   console.log('');
 };
 
+try {
+  await dbReady;
+  log.success("Base de datos PostgreSQL lista (migraciones aplicadas).");
+} catch (err) {
+  log.error("No se pudo conectar/preparar la base de datos PostgreSQL. El bot no iniciará.");
+  console.error(err);
+  process.exit(1);
+}
 await loadPlugins();
 const BOT_SESSION_FOLDER = "./BotSession";
 const BOT_CREDS_PATH = path.join(BOT_SESSION_FOLDER, "creds.json");
@@ -94,6 +103,27 @@ if (!globalThis.conns || !(globalThis.conns instanceof Array)) globalThis.conns 
 const reconectando = new Set();
 let usarCodigo = false;
 let numero = "";
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+
+// --- Entrada segura del usuario (TTY-safe) ---
+// readline-sync requiere una terminal interactiva real. En paneles de
+// hosting que no exponen un TTY correctamente, question() puede colgarse
+// o comportarse de forma errática (entradas repetidas/desfasadas). Esta
+// función evita eso: si no hay TTY, no bloquea y retorna un valor por
+// defecto en vez de intentar leer stdin.
+function askQuestion(promptText, fallback = "") {
+  if (!process.stdin.isTTY) {
+    log.warn("No se detectó una terminal interactiva (TTY). No se pedirá entrada por consola.");
+    return fallback;
+  }
+  try {
+    return readlineSync.question(promptText);
+  } catch (err) {
+    log.error("No se pudo leer la entrada del usuario: " + (err?.message || err));
+    return fallback;
+  }
+}
 
 // --- Detector de spam de "ekey bundle" ---
 let spamCount = 0;
@@ -158,7 +188,21 @@ if (mobile) {
   );
 }
 
-const opcion = readlineSync.question(chalk.hex(theme.secondary).bold('  ➜ ') + chalk.hex(theme.cyan)('Opción: '));
+// Permite fijar el método/número por variables de entorno (útil en paneles
+// de hosting donde el TTY interactivo no funciona correctamente, p.ej.
+// panel.swallox.com). Si no hay TTY y tampoco variables de entorno, se
+// asume QR por defecto en vez de quedar esperando una entrada que nunca
+// llegará (causa raíz del loop observado con readline-sync en paneles web).
+const envMethod = (process.env.PAIR_METHOD || "").trim();
+const envNumero = (process.env.PAIR_NUMBER || "").replace(/[^0-9]/g, '');
+
+let opcion;
+if (envMethod === "1" || envMethod === "2") {
+  opcion = envMethod;
+  log.info(`Método de vinculación tomado de PAIR_METHOD=${envMethod}`);
+} else {
+  opcion = askQuestion(chalk.hex(theme.secondary).bold('  ➜ ') + chalk.hex(theme.cyan)('Opción: '), "1");
+}
 
 usarCodigo = opcion === "2";
 if (usarCodigo) {
@@ -184,10 +228,33 @@ if (mobile) {
     theme.info
   );
 }
-numero = readlineSync.question(chalk.hex(theme.secondary).bold('  ➜ ') + chalk.hex(theme.cyan)('Número: ')).replace(/[^0-9]/g, '');
+if (envNumero) {
+  numero = envNumero;
+  log.info(`Número tomado de PAIR_NUMBER (variable de entorno).`);
+} else {
+  numero = askQuestion(chalk.hex(theme.secondary).bold('  ➜ ') + chalk.hex(theme.cyan)('Número: '), "").replace(/[^0-9]/g, '');
+}
 if (numero.startsWith('52') && !numero.startsWith('521')) {
 numero = '521' + numero.slice(2);
-}}
+}
+
+if (!numero || numero.length < 10) {
+  log.error(`Número inválido o vacío ("${numero}"). No se puede solicitar código de emparejamiento.`);
+  createBox(
+    chalk.bold.white(' ❌ NÚMERO INVÁLIDO'),
+    [
+      '',
+      chalk.white(' No se recibió un número de teléfono válido.'),
+      chalk.hex(theme.muted)(' Usa PAIR_METHOD=2 y PAIR_NUMBER=521xxxxxxxxxx'),
+      chalk.hex(theme.muted)(' como variables de entorno si tu panel de hosting'),
+      chalk.hex(theme.muted)(' no permite entrada interactiva por consola.'),
+      '',
+    ],
+    theme.error
+  );
+  process.exit(1);
+}
+}
 }
 
 await cargarSubbots();
@@ -332,7 +399,41 @@ if (mobile) {
   );
 }
 }
-log.system("Reconectando en 3s...");
+
+// No reintentar indefinidamente si el cierre ocurrió antes de completar
+// el emparejamiento (usuario nunca llegó a vincularse) o si el código de
+// error indica que la sesión fue cerrada/baneada. Esto evita el loop
+// infinito observado en paneles de hosting cuando requestPairingCode
+// falla silenciosamente y el bot jamás llega a state.creds.registered.
+const sesionInvalida = [401, 440, 428, 405].includes(code);
+const yaRegistrado = state.creds.registered;
+
+if (sesionInvalida) {
+  log.error(`Sesión inválida (código ${code}). No se reintentará automáticamente. Elimina "BotSession" y reinicia para vincular de nuevo.`);
+  return;
+}
+
+if (usarCodigo && !yaRegistrado) {
+  reconnectAttempts++;
+  if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+    log.error(`Se alcanzó el máximo de ${MAX_RECONNECT_ATTEMPTS} intentos de vinculación sin éxito. Deteniendo reintentos automáticos.`);
+    createBox(
+      chalk.bold.white(' ❌ VINCULACIÓN FALLIDA'),
+      [
+        '',
+        chalk.white(' No se pudo completar la vinculación tras varios intentos.'),
+        chalk.hex(theme.muted)(' Verifica el número (PAIR_NUMBER) e inténtalo de nuevo.'),
+        '',
+      ],
+      theme.error
+    );
+    return;
+  }
+  log.system(`Reconectando en 3s... (intento ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+} else {
+  reconnectAttempts = 0;
+  log.system("Reconectando en 3s...");
+}
 setTimeout(() => startBot(), 3000);
 }});
 
@@ -342,7 +443,12 @@ process.on('unhandledRejection', console.error);
 if (usarCodigo && !state.creds.registered) {
 setTimeout(async () => {
 try {
+if (!numero) {
+  log.error("No hay número configurado para solicitar el código de emparejamiento.");
+  return;
+}
 const code = await sock.requestPairingCode(numero);
+reconnectAttempts = 0;
 const mobile = isMobile();
 
 if (mobile) {
@@ -374,7 +480,21 @@ if (mobile) {
     theme.info
   );
 }
-} catch {}
+} catch (err) {
+  log.error("No se pudo generar el código de emparejamiento: " + (err?.message || err));
+  console.error(err);
+  createBox(
+    chalk.bold.white(' ❌ ERROR AL GENERAR CÓDIGO'),
+    [
+      '',
+      chalk.white(' Verifica que el número tenga el código de país correcto'),
+      chalk.white(' y que no tenga espacios ni símbolos (solo dígitos).'),
+      chalk.hex(theme.muted)(` Detalle: ${(err?.message || err || '').toString().slice(0, 80)}`),
+      '',
+    ],
+    theme.error
+  );
+}
 }, 2000);
 }
 
