@@ -1,0 +1,20 @@
+.env
+.env.*
+!.env.example
+.npm/
+node_modules/
+coverage/
+*.log
+npm-debug.log*
+
+# Estado y datos generados
+BotSession/
+jadibot/
+tmp/
+backups/
+data/
+certs/
+
+
+
+database/

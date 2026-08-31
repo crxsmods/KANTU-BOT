@@ -1,0 +1,70 @@
+{
+  "name": "kantu-bot",
+  "version": "2.2.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.11.0 <25",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "start": "node --max-old-space-size=512 index.js",
+    "start:prod": "node --max-old-space-size=512 index.js",
+    "dev": "node index.js",
+    "lint": "node --no-warnings --experimental-vm-modules scripts/lint.js",
+    "queries:generate": "node scripts/generate-query-catalog.js",
+    "queries:check": "node scripts/generate-query-catalog.js --check",
+    "check:public": "node scripts/check-public-release.js",
+    "check:production": "node scripts/check-production.js",
+    "verify": "node scripts/verify.js",
+    "db:check": "node scripts/check-database.js",
+    "db:backup": "node scripts/export-database.js"
+  },
+  "dependencies": {
+    "@bochilteam/scraper": "^5.0.1",
+    "@electric-sql/pglite": "^0.5.8",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "acrcloud": "^1.4.0",
+    "axios": "^1.20.0",
+    "axios-cookiejar-support": "^5.0.5",
+    "cfonts": "^3.3.1",
+    "chalk": "^5.6.2",
+    "cheerio": "1.0.0-rc.12",
+    "dotenv": "^17.4.2",
+    "file-type": "^22.0.2",
+    "form-data": "^4.0.6",
+    "formdata-node": "^5.0.1",
+    "fuzzysort": "^1.9.0",
+    "human-readable": "^0.2.1",
+    "jimp": "^1.6.1",
+    "lodash": "^4.18.1",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2",
+    "node-webpmux": "^3.2.1",
+    "performance-now": "^2.1.0",
+    "pg": "^8.23.0",
+    "pino": "^8.21.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "syntax-error": "^1.4.0",
+    "tough-cookie": "^5.1.2",
+    "ws": "^8.21.3",
+    "yt-search": "^2.13.1",
+    "ytdl-core": "^4.11.5"
+  },
+  "optionalDependencies": {
+    "moment-timezone": "^0.5.48"
+  },
+  "overrides": {
+    "minimatch": "3.1.5"
+  },
+  "allowScripts": {
+    "@whiskeysockets/baileys@7.0.0-rc14": true,
+    "protobufjs@7.6.6": true
+  },
+  "devDependencies": {
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4"
+  }
+}

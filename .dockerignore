@@ -1,0 +1,17 @@
+.git
+.github
+.npm
+.env
+.env.*
+!.env.example
+node_modules
+BotSession
+jadibot
+tmp
+backups
+data
+coverage
+certs
+simple-baileys-bot
+*.log
+npm-debug.log*

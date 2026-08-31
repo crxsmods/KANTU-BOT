@@ -1,0 +1,3708 @@
+{
+  "format": "kantu-query-catalog",
+  "version": 1,
+  "operations": [
+    {
+      "id": "0053942a69e195e7dae529848be77c3a3c9ff90d833879abe3b225241ddbfd2c",
+      "text": "SELECT limite, exp, money, banco FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-balance.js",
+          "line": 3
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "00e02892a2d622550a7f7389bbe5e9b2a36ab98cdbb7709197cb146718fe77f3",
+      "text": "UPDATE usuarios \n    SET exp = exp + $1, lastmiming = $2 \n    WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-mine.js",
+          "line": 13
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "0405c05fea46b014f3905f343f789b7d98b985255c965d5fc18e0b3ad6707177",
+      "text": "UPDATE group_settings SET modohorny = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 104
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "04117ae4942ff85d033d41aab4d3ba6bab333416791bbcf45b57c94355fb69c3",
+      "text": "INSERT INTO chat_memory (chat_id, history, updated_at)\n      VALUES ($1, $2, NOW())\n      ON CONFLICT (chat_id) DO UPDATE SET history = $2, updated_at = NOW()",
+      "access": "write",
+      "tables": [
+        "chat_memory"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/_autoresponder.js",
+          "line": 106
+        },
+        {
+          "file": "plugins/herramientas-chagpt.js",
+          "line": 88
+        }
+      ],
+      "scopes": [
+        "memory:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "0732f075fd502d8bcb349c4ffdf335a258b45e5c08519f821349ea59b4bf496d",
+      "text": "UPDATE usuarios \n      SET exp = exp + $1, limite = limite + $2, money = money + $3, lastclaim = $4, dailystreak = $5\n      WHERE id = $6",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 6,
+      "sources": [
+        {
+          "file": "plugins/rpg-daily.js",
+          "line": 24
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "0ae9ec130c82672644feb25af471d11030fb8046dc9207746923dbb929f8139e",
+      "text": "UPDATE usuarios SET exp = exp + $1, lastslut = $2 WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-slut.js",
+          "line": 14
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "0b30423d7d249986cb43e24020097021e73f8b8909e086e515d6c7c5c56025d9",
+      "text": "UPDATE group_settings SET antilink2 = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 83
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "0be6d5648ed9336ad2c6ca78b1165931b9540f96fb49a3b4abc043e0b393d18c",
+      "text": "UPDATE group_settings SET memory_ttl = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/grupo-setprompt.js",
+          "line": 47
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "0c59110e37e6b172f20595d7467e41d3aebf6317b9de9af7642ba15cfc8447f5",
+      "text": "SELECT * FROM reportes WHERE enviado = false ORDER BY fecha ASC LIMIT 10",
+      "access": "read",
+      "tables": [
+        "reportes"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 814
+        }
+      ],
+      "scopes": [
+        "reports:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "0dcd531046d68f65452d53013a7076da94f2f6bfcb319dc12adc346593424c09",
+      "text": "SELECT id, name, claimed_by FROM characters WHERE LOWER(name) = $1 AND claimed_by = $2",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-regalar.js",
+          "line": 11
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "0ecd9293ac45c5d343bbc92753d0efbb6ce3e56c8fe05802d1828eb523d3aed9",
+      "text": "UPDATE usuarios \n      SET exp = exp - $1, limite = limite + $2 \n      WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-shop.js",
+          "line": 17
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "107e95cd51a8bfaf85b16c6e3a66735246e886ecac90a641693df9dba3b1ad03",
+      "text": "UPDATE usuarios SET lid = NULL WHERE lid = $1 AND id <> $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 552
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "114e7e7e3588d5b37164b741d9e1613404e9c6d8588a6a5da5768a5421158fc4",
+      "text": "SELECT SUM(count)::int AS total FROM stats",
+      "access": "read",
+      "tables": [
+        "stats"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/info-infobot.js",
+          "line": 83
+        }
+      ],
+      "scopes": [
+        "stats:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "12c0e3309cf477ee748f907b58c924762920bea97253fd6bbcd9f26bc23851af",
+      "text": "SELECT COUNT(*)::int AS total,\n             COUNT(*) FILTER (WHERE registered = true)::int AS registrados\n      FROM usuarios",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/main-menu.js",
+          "line": 108
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "16c3452a79fe978085011a809cfb8bf7c517dde71ca43bbe11838eb16fdefeb1",
+      "text": "DELETE FROM reportes WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "reportes"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 821
+        }
+      ],
+      "scopes": [
+        "reports:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "17b4c74bf93c679f10c384a7f318bcd8fd88ba0bb36121b40b974156cb9647c9",
+      "text": "SELECT id, razon_ban, avisos_ban FROM usuarios WHERE banned = true",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/herramientas-list.js",
+          "line": 44
+        }
+      ],
+      "scopes": [
+        "users:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "18b232801b95648f643898f950eba37a4bcae52bdf68d85d9d2668b09deb88f4",
+      "text": "SELECT COUNT(*) AS total FROM usuarios WHERE registered = true",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/rpg-reg.js",
+          "line": 104
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "19567d04d766c8b85c1cf1065ab73163e10415b5cf6458079dba6f0866065aa8",
+      "text": "SELECT modoadmin FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 623
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "19bfb35302a99f6747b9511b19a1018e3f0c9ec6d6040bbc56030763251ded22",
+      "text": "UPDATE usuarios SET exp = GREATEST(exp - $1, 0), crime = $2 WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 27
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "19c02fed9fa5500d904493e4f1d1ac7fc11701def507f2056f94279798756879",
+      "text": "SELECT exp, lastslut FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-slut.js",
+          "line": 4
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "1c89936388ef5e2ff8f5a7cad13d28545c70401a301d61a2d7f13323613166a1",
+      "text": "SELECT limite FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 707
+        },
+        {
+          "file": "plugins/owner-join.js",
+          "line": 53
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "1d53285146e552168fd35ad122ed5f66f745fc0e7539540e9e84f2f864a48d5c",
+      "text": "INSERT INTO usuarios (id, nombre, num, lid, registered)\n     VALUES ($1, $2, $3, $4, false)\n     ON CONFLICT (id) DO UPDATE SET nombre = EXCLUDED.nombre, num = EXCLUDED.num",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 543
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "1d9194e0f68552ee28fc72e4480624bbb6c3859a15905d61ed6d20839134747a",
+      "text": "INSERT INTO chats (id, is_group, timestamp, bot_id, joined)\n  VALUES ($1, $2, $3, $4, true)\n  ON CONFLICT (id) DO UPDATE SET timestamp = $3, bot_id = $4, joined = true",
+      "access": "write",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 355
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "1de420b75bcda7da3d2472da76964ef6a1c59c50541062ab0da24c1dcc30701e",
+      "text": "SELECT sautorespond, memory_ttl FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_autoresponder.js",
+          "line": 45
+        },
+        {
+          "file": "plugins/herramientas-chagpt.js",
+          "line": 18
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "1e54f16e4288b6d104269b86bc4fc332ab0263b6155cb46fd16d5cf140ff4d99",
+      "text": "UPDATE usuarios SET marry_request = NULL WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 27
+        },
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 43
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "1ed656ac32467ae2c31850dd1e98c3f916edb8b4e43a195b9e0bcc1903b08b88",
+      "text": "UPDATE usuarios SET exp = GREATEST(exp - $1, 0) WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 40
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "1f7f9cd818e1c73f77a422da58254e71498d1595fc24422a74aad82a24960877",
+      "text": "SELECT exp FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/game-ppt.js",
+          "line": 13
+        },
+        {
+          "file": "plugins/rpg-rob.js",
+          "line": 20
+        },
+        {
+          "file": "plugins/rpg-rw-vender.js",
+          "line": 101
+        },
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 107
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "230d9277196e9a69523efa001749ed87114be2ec1bef5c038c26882671b0c4df",
+      "text": "INSERT INTO subbots (id, prefix)\n         VALUES ($1, $2)\n         ON CONFLICT (id) DO UPDATE SET prefix = $2 RETURNING prefix",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-setprefix.js",
+          "line": 23
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "25660e4297b066446381ee9e227ee26250abc67616b140b3f78f9c815e64d8e6",
+      "text": "UPDATE usuarios SET limite = GREATEST(0, limite - $1) WHERE id = $2 RETURNING limite",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-add.js",
+          "line": 29
+        }
+      ],
+      "scopes": [
+        "users:write",
+        "official:admin"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "297e8215b1ad139a1f4e15721d33967e1ba7c87f0275b857e8fa84f520bd1ede",
+      "text": "SELECT * FROM characters WHERE LOWER(name) = $1 AND seller = $2 AND for_sale = true",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-retirar.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "2b840a5e34f94d0286079ddcc7126c33e0c65ad3b84c85b0293eb2e8498d6fc4",
+      "text": "INSERT INTO characters (\n        name, url, tipo, anime, rareza, price, previous_price,\n        claimed_by, for_sale, seller, votes\n      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\n      RETURNING *",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 11,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 66
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "2ca8dca342bbf02f7c4587cc2f297f990b57a963e2b8ea828447722b5f13aa97",
+      "text": "UPDATE subbots SET logo_url = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-setlogo.js",
+          "line": 8
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "2d997c7a497f676c0ac3a8100d4a16cd7374798c8ec58b2c42336c4ac9fb5880",
+      "text": "INSERT INTO group_settings (group_id, banned)\n      VALUES ($1, true)\n      ON CONFLICT (group_id) DO UPDATE SET banned = true",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/owner-banchat.js",
+          "line": 4
+        }
+      ],
+      "scopes": [
+        "groups:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "2db047a16deb3b818b82846303f6cdb0cac9b2d49607cab9d2a7b367555672a6",
+      "text": "INSERT INTO subbots (id, anti_call)\n    VALUES ($1, $2)\n    ON CONFLICT (id) DO UPDATE SET anti_call = $2",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 124
+        }
+      ],
+      "scopes": [
+        "bots:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "2e0ff58e7f77ccc30215dbdc5876bad0faaf50bd3ace9082bf985bddab42d625",
+      "text": "SELECT lid FROM usuarios WHERE num = ANY($1::text[]) AND lid IS NOT NULL",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "lib/identity.js",
+          "line": 106
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "2f2fde3498763cf643ff14ecb379c1ef4fb55d100fb64fa0089e81f0daff176b",
+      "text": "SELECT COUNT(*) FROM group_settings WHERE welcome IS NOT NULL",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/owner-db.js",
+          "line": 13
+        }
+      ],
+      "scopes": [
+        "groups:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "301b1790fe32a37f16e7e2076e9450f664c932dfd509b62c55d40ec9159a6b1e",
+      "text": "UPDATE usuarios SET exp = GREATEST(0, exp - $1) WHERE id = $2 RETURNING exp",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-add.js",
+          "line": 39
+        }
+      ],
+      "scopes": [
+        "users:write",
+        "official:admin"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "30c41ae033bcde98903f6b56544278026901bc1b3aa3f987c1c4b9503c38af78",
+      "text": "UPDATE characters SET price = $1, for_sale = true, seller = $2, previous_price = $3 WHERE id = $4",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vender.js",
+          "line": 84
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "31aed5e211e9e57234c4c17a376e65fd67e3de5b0b1f303915b5e78077c30c56",
+      "text": "INSERT INTO usuarios (id, warn_pv) VALUES ($1, true)",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_antiprivado.js",
+          "line": 40
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "31e8997782e2193a9dc70d86d9937846e7c65f6ae9c571d70e7a981dada63088",
+      "text": "SELECT id FROM chats\n  WHERE is_group = false AND bot_id = $1",
+      "access": "read",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/info-infobot.js",
+          "line": 70
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "33a7fe56e1dd404f040185a03b8f75610e276cc01a053d6f4ca24426a88786aa",
+      "text": "UPDATE group_settings SET welcome = false WHERE group_id = $1",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-fantasmas.js",
+          "line": 54
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "341eee85d125fbc7bf9feb30b0edceb914bda864751b2246bd835d7c75928bae",
+      "text": "SELECT exp, lastmiming FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-mine.js",
+          "line": 5
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "347a60036d0a1fde792a70d1d753db83de46bbbde2a9f71c6dfe66b7a8bb37f9",
+      "text": "INSERT INTO usuarios (id, warn) VALUES ($1, 0)",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-warn.js",
+          "line": 19
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "36c6dd2ec58bc138897bcc021ba56350b637cc9a2cc5b5d736f0cb4c72468c1d",
+      "text": "SELECT * FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 699
+        },
+        {
+          "file": "lib/simple.js",
+          "line": 143
+        },
+        {
+          "file": "plugins/grupo-delwarn.js",
+          "line": 13
+        },
+        {
+          "file": "plugins/grupo-warn.js",
+          "line": 16
+        },
+        {
+          "file": "plugins/grupo-warn.js",
+          "line": 20
+        },
+        {
+          "file": "plugins/main-menu.js",
+          "line": 99
+        },
+        {
+          "file": "plugins/rpg-perfil.js",
+          "line": 17
+        },
+        {
+          "file": "plugins/rpg-reg.js",
+          "line": 9
+        },
+        {
+          "file": "plugins/rpg-transfer.js",
+          "line": 9
+        },
+        {
+          "file": "plugins/rpg-transfer.js",
+          "line": 34
+        },
+        {
+          "file": "plugins/rpg-transfer.js",
+          "line": 70
+        },
+        {
+          "file": "plugins/rpg-transfer.js",
+          "line": 71
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "3a8373b9694a14739058c84051144384c239041e7ff9a6c22c27c1e61e26a7a3",
+      "text": "SELECT group_id, expired FROM group_settings WHERE expired IS NOT NULL AND expired > 0 AND expired < $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 788
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "3bb42023992e9ee2756c9a962c11f0a89f70eb7b76c300d735315d96b786ebf5",
+      "text": "INSERT INTO stats (command, count)\n    VALUES ($1, 1)\n    ON CONFLICT (command) DO UPDATE SET count = stats.count + 1",
+      "access": "write",
+      "tables": [
+        "stats"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 772
+        }
+      ],
+      "scopes": [
+        "stats:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "3d7fa47681ee2ab6beaa4e179076fbb2d6d3e8ee1da513374ca7aacc8a083440",
+      "text": "SELECT COUNT(*) FROM usuarios",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/owner-db.js",
+          "line": 10
+        }
+      ],
+      "scopes": [
+        "users:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "411dd8c68bd6a0aabb5909b25eaff3ea92e15989be88d6a111eaf65eb507115f",
+      "text": "SELECT antilink2 FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_antilink2.js",
+          "line": 12
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "418e21c3609c98f5898c376dcd3f7d673eab79f6050d1f2929e4b707e5383900",
+      "text": "UPDATE characters SET votes = $1, price = $2 WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vote.js",
+          "line": 24
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "41c05dbc3962f3403c25f33f1e9431083a1aec285c2cd57d1455dd2d4b5895a5",
+      "text": "SELECT name FROM characters WHERE LOWER(name) = $1",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-regalar.js",
+          "line": 15
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "4354a3c0500c956dcf8fa5a3f263f13d46b3a77c7899dc432fdca6f1b0cbbb70",
+      "text": "UPDATE usuarios SET exp = exp + $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/game-ppt.js",
+          "line": 27
+        },
+        {
+          "file": "plugins/game-ppt.js",
+          "line": 112
+        },
+        {
+          "file": "plugins/game-ttt.js",
+          "line": 126
+        },
+        {
+          "file": "plugins/rpg-rw-vender.js",
+          "line": 111
+        },
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 122
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "4981fcda14db5b643496cff15453aa6ddae656c194c73625e2ca15009a0ac697",
+      "text": "INSERT INTO group_settings (group_id, sAutorespond)\n    VALUES ($1, $2)\n    ON CONFLICT (group_id) DO UPDATE SET sAutorespond = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/grupo-setprompt.js",
+          "line": 71
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "4a0db71ae2383ef31cd009480d9eb60fcb518b904552477fa0e8fedea61d819d",
+      "text": "UPDATE usuarios SET exp = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/game-ppt.js",
+          "line": 32
+        },
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 121
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "4adf19707f4a96418b7847d01485dd4c8ce5246438300328d63310643be0e777",
+      "text": "UPDATE usuarios SET exp = exp + $1, lastrob = $2 WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-rob.js",
+          "line": 26
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "4b4c89cf8d4f0fb01275be95c2792be74a61d5f669fbd76230b92ac6de5cdb23",
+      "text": "SELECT timevot FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vote.js",
+          "line": 8
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "4e7239f2cbe618c913314527badc0d251803c158363eab9db68510200aa08865",
+      "text": "UPDATE usuarios SET money = money - $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 728
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "4e9c0f28aebed659ed0de5f708986e832de79d9636f2b300bd7b9bbe63c2eeac",
+      "text": "INSERT INTO subbots (id, prestar)\n        VALUES ($1, $2)\n        ON CONFLICT (id) DO UPDATE SET prestar = $2 RETURNING prestar",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/jadi-privacidad.js",
+          "line": 21
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "4f117bc1aeace2850639fb038285aec8e61c628ba9ecc64f082d797ab2958d03",
+      "text": "SELECT nombre FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "lib/simple.js",
+          "line": 277
+        },
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 7
+        },
+        {
+          "file": "plugins/rpg-perfil.js",
+          "line": 43
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "5383324394ad7b252a496364e8a74ef1bf63ef7e6444c9d99b51a5fd15b0f978",
+      "text": "UPDATE group_settings SET nsfw_horario = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/grupo-sethorario.js",
+          "line": 7
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "54d87ead5f2d064dd2a9e9e429b430d045742bc0b36ab64efad9ccb158bad73f",
+      "text": "SELECT exp, money, limite, wait FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/game-slot.js",
+          "line": 5
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "5791e0138ea334e10eb66cdc8011dd4eab84b444b9bb83f33ad7e2941d9c2a58",
+      "text": "UPDATE group_settings SET antifake = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 97
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "59cd75ea81a77de8d4dcea30aaf980308d2392cd6721b7c986b218035d2106b1",
+      "text": "UPDATE usuarios SET limite = limite + $1 WHERE id = $2 RETURNING limite",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-add.js",
+          "line": 24
+        }
+      ],
+      "scopes": [
+        "users:write",
+        "official:admin"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "5a451600216dfccd651851908c73eb2c616e5dae26978e96670dd0678a9156b7",
+      "text": "SELECT name, price FROM characters WHERE claimed_by = $1 ORDER BY name",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-harem.js",
+          "line": 11
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "5a9e12a200357557f699f8044510364a6fdaaf110286b73d302589d733becd14",
+      "text": "SELECT id, name, price, votes FROM characters WHERE LOWER(name) = $1",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vote.js",
+          "line": 15
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "5cc54bc134092734370b7c4b483c03c2a6f32fe61649b2cb690a8181da9b2d08",
+      "text": "SELECT user_id, message_count FROM messages WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "messages"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-fantasmas.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "5d6aa376941d3bd202e33be9c3f88abcd9721279026a53cdd61df5e277b45c4c",
+      "text": "UPDATE group_settings SET swelcome = $1, photowelcome = COALESCE($2::boolean, photowelcome) WHERE group_id = $3",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/grupo-setConfig.js",
+          "line": 37
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "60505c0cf98e296161313557bb583f4615803dc45565e9694886f3fd69912f94",
+      "text": "UPDATE subbots SET tipo = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 368
+        }
+      ],
+      "scopes": [
+        "bots:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "6082f5b24b60996260bb90fc6af68eb5652be055d3431b1bc44790c9740f2ff2",
+      "text": "SELECT exp, limite FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-shop.js",
+          "line": 4
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "60987179cdeed38ab90ea25a8015f6ae88e1a8ee6a71a0bc1ecdfd85a0287d02",
+      "text": "UPDATE usuarios SET timevot = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vote.js",
+          "line": 26
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "677c85490e5da5acaae6319b756ee8076ca945dce7a6845a4903efaa115ef987",
+      "text": "SELECT group_id FROM group_settings WHERE banned = true",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/herramientas-list.js",
+          "line": 25
+        }
+      ],
+      "scopes": [
+        "groups:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "680b299ffe74d7c8cedfc71250ae7236772633ec8659490ed69dbcfc1c10803d",
+      "text": "UPDATE usuarios SET marry = NULL WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja-divorce.js",
+          "line": 9
+        },
+        {
+          "file": "plugins/rpg-pareja-divorce.js",
+          "line": 10
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "688da18613e68c987c6d9dd5a6c517d89d6fff2cadd7a71ce13ac2712c300b8e",
+      "text": "UPDATE usuarios SET exp = exp - $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/game-ppt.js",
+          "line": 113
+        },
+        {
+          "file": "plugins/game-ttt.js",
+          "line": 127
+        },
+        {
+          "file": "plugins/rpg-rob.js",
+          "line": 27
+        },
+        {
+          "file": "plugins/rpg-rw-vender.js",
+          "line": 110
+        },
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 136
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "70070162ec9ee6f6a59773428448afd916b6f56b71a816c1fc54a02743e00b32",
+      "text": "UPDATE group_settings SET sbye = $1, photobye = COALESCE($2::boolean, photobye) WHERE group_id = $3",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/grupo-setConfig.js",
+          "line": 45
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "71f1e3d69e1bf99cc993c7b2b75c9c465fa844c4090ea927e17f733fd3fed78f",
+      "text": "SELECT id, marry FROM usuarios WHERE marry IS NOT NULL",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/herramientas-list.js",
+          "line": 63
+        }
+      ],
+      "scopes": [
+        "users:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "72b1a8aabbba203fc810453dceedebd29a37dcd61a9fc5e85132b8bed6b133ae",
+      "text": "UPDATE usuarios SET limite = limite + $1, money = money + $2, crime = $3 WHERE id = $4",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 31
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "737722b09465b03250cb9c6648908e2cf719f077534811f0019d3f6c779a1c27",
+      "text": "INSERT INTO usuarios (id, nombre, edad, gender, money, limite, exp, reg_time, registered, serial_number)\n        VALUES ($1,$2,$3,$4,400,2,150,$5,true,$6)\n        ON CONFLICT (id) DO UPDATE\n        SET nombre = $2,\n            edad = $3,\n            gender = $4,\n            money = COALESCE(usuarios.money, 0) + 400,\n            limite = COALESCE(usuarios.limite, 0) + 2,\n            exp = COALESCE(usuarios.exp, 0) + 150,\n            reg_time = $5,\n            registered = true,\n            serial_number = $6,\n            email = NULL\n        WHERE usuarios.registered IS NOT TRUE\n        RETURNING id",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 6,
+      "sources": [
+        {
+          "file": "plugins/rpg-reg.js",
+          "line": 82
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "7432cf69c1268cda739756dcb72bf428fbe1090687f716001dc8cc6da89d3a57",
+      "text": "SELECT * FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 69
+        },
+        {
+          "file": "handler.js",
+          "line": 277
+        },
+        {
+          "file": "lib/simple.js",
+          "line": 162
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 12
+        },
+        {
+          "file": "plugins/grupo-fantasmas.js",
+          "line": 52
+        },
+        {
+          "file": "plugins/grupo-groupInfo.js",
+          "line": 26
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "75306cc78445a80a47bd51f0617a707f04d7603dfe12b4f7322e252b6a43d413",
+      "text": "UPDATE usuarios \n     SET exp = exp + $1, money = money + $2, limite = limite + $3, lastcofre = $4 \n     WHERE id = $5",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 5,
+      "sources": [
+        {
+          "file": "plugins/rpg-cofre.js",
+          "line": 49
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "755ecc08ac5f0018e707dada80acefcdc7abda1325d7aee7d10cf076c28d216c",
+      "text": "UPDATE usuarios SET banco = 0, limite = limite + $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-banc.js",
+          "line": 30
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "781e81444bdf0a52b48f1ac08d6329ad9872ca40011fbceaaa03a4954f1fca05",
+      "text": "INSERT INTO reportes (sender_id, sender_name, mensaje, tipo) VALUES ($1, $2, $3, $4)",
+      "access": "write",
+      "tables": [
+        "reportes"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "plugins/info-reporte.js",
+          "line": 13
+        },
+        {
+          "file": "plugins/owner-join.js",
+          "line": 41
+        }
+      ],
+      "scopes": [
+        "reports:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "787277edb01acc1e73f273d87b8e05585db0462c7a93585000992db97608fe21",
+      "text": "INSERT INTO subbots (id, mode)\n      VALUES ($1, $2)\n      ON CONFLICT (id) DO UPDATE SET mode = $2 RETURNING mode",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-self.js",
+          "line": 12
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "7888702b2084d0d73b97f5d03d3d0dc954b57bd5ff94920404c58341b64eba4d",
+      "text": "SELECT COUNT(*) FROM usuarios WHERE registered = true",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/owner-db.js",
+          "line": 11
+        }
+      ],
+      "scopes": [
+        "users:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "7893524eb2b60d5bdf6bd19bdfdc58afe0d82fd18afb6cb3200d0f2595f6b62f",
+      "text": "SELECT COUNT(*)::int FROM usuarios",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/info-infobot.js",
+          "line": 80
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "7ba89569625bdc3031a6902814ce43c47211e6895aa4ec3f76efd60734e99f91",
+      "text": "SELECT marry_request FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 25
+        },
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 33
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "7cb7a295477b92de8ef4a2ac301ee5872dc7f6caee79078c06f3c7daf36b2997",
+      "text": "SELECT * FROM characters WHERE url = $1",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 62
+        },
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 109
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "8099746bc1cfc68592112544fff68462065b9e6a7b47f49005dbcdc28708d7ef",
+      "text": "SELECT COUNT(*)::int FROM chats",
+      "access": "read",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/info-infobot.js",
+          "line": 82
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "80c35ac1c211f0a951e6d43bf19307f129645dcff96be35232e3b5840897f7a1",
+      "text": "SELECT exp, money, limite, lastcofre FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-cofre.js",
+          "line": 30
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "81052191757c0ca76f5e4a2d41600259be7089b26a76a0be6aab3b476a8067ea",
+      "text": "SELECT * FROM characters WHERE claimed_by = $1",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vender.js",
+          "line": 22
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "83544ec8c8b6974e87e6f39f5c8eaac399d07e3ad73973e35be512b55bb91e7b",
+      "text": "INSERT INTO subbots (id, prefix)\n       VALUES ($1, $2)\n       ON CONFLICT (id) DO UPDATE SET prefix = $2 RETURNING prefix",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-setprefix.js",
+          "line": 36
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "85bab5df681d5d4c9be9187327ae1eed79580a0a9177790fce16663b76557abb",
+      "text": "SELECT warn_pv FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_antiprivado.js",
+          "line": 36
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "87d24d20d8074380fc670e35536e47c137c64c07e2450e395f7fc00b59ff87fb",
+      "text": "UPDATE usuarios SET level = $1, role = $2 WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/_autolevelup.js",
+          "line": 20
+        },
+        {
+          "file": "plugins/rpg-levelup.js",
+          "line": 31
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "8ace74ca8ddfd6a860836e1a4f4fb7dff22e9275ec36d85169885d2f9b994e83",
+      "text": "SELECT id FROM chats WHERE is_group = true AND joined = true AND bot_id = $1",
+      "access": "read",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/info-grouplist.js",
+          "line": 8
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "8adccc0d557f315844362e6cd8960850b1fe34f5d692e2c15d5e5c7fc4c9c472",
+      "text": "WITH candidate AS MATERIALIZED (\n    SELECT id, COALESCE(exp, 0) AS exp, COALESCE(money, 0) AS money,\n           COALESCE(limite, 0) AS limite, COALESCE(wait, 0) AS wait,\n           FLOOR(EXTRACT(EPOCH FROM clock_timestamp()) * 1000)::bigint AS now_ms,\n           random() AS roll\n    FROM usuarios\n    WHERE id = $1\n    FOR UPDATE\n  ),\n  rolled AS (\n    SELECT *,\n      CASE WHEN roll < (1.0 / 36.0) THEN 3\n           WHEN roll < (1.0 / 36.0) + (5.0 / 12.0) THEN 1\n           ELSE -1 END AS multiplier\n    FROM candidate\n  ),\n  updated AS (\n    UPDATE usuarios AS u\n    SET exp = CASE WHEN $2 = 'exp'\n          THEN LEAST(2147483647, GREATEST(0, COALESCE(u.exp, 0)::bigint + $3::bigint * r.multiplier))::integer\n          ELSE u.exp END,\n        money = CASE WHEN $2 = 'money'\n          THEN LEAST(2147483647, GREATEST(0, COALESCE(u.money, 0)::bigint + $3::bigint * r.multiplier))::integer\n          ELSE u.money END,\n        limite = CASE WHEN $2 = 'limite'\n          THEN LEAST(2147483647, GREATEST(0, COALESCE(u.limite, 0)::bigint + $3::bigint * r.multiplier))::integer\n          ELSE u.limite END,\n        wait = r.now_ms\n    FROM rolled AS r\n    WHERE u.id = r.id\n      AND $2 IN ('exp', 'money', 'limite')\n      AND $3 BETWEEN 10 AND 1000000\n      AND r.wait + 30000 <= r.now_ms\n      AND CASE $2 WHEN 'exp' THEN r.exp WHEN 'money' THEN r.money ELSE r.limite END >= $3\n    RETURNING u.exp, u.money, u.limite, u.wait, r.multiplier\n  )\n  SELECT * FROM updated",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/game-slot.js",
+          "line": 41
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "8ba86d02c0a03dcdbed6f78b47c725f7f656b32cd8c56e5e9cc0a21cc954229a",
+      "text": "SELECT marry FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja-divorce.js",
+          "line": 5
+        },
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 3
+        },
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 17
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "8e02b4c9c55052d428113f190c035cbc6499993045f28d902a24795cfbc8bfa2",
+      "text": "INSERT INTO group_settings (group_id, banned)\n      VALUES ($1, false)\n      ON CONFLICT (group_id) DO UPDATE SET banned = false",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/owner-unbanchat.js",
+          "line": 4
+        }
+      ],
+      "scopes": [
+        "groups:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "8f44c8f38a272ffd33850dd2fa7f970a6b724fbfc37b71927468ec006eac2446",
+      "text": "SELECT banned, primary_bot FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 513
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "8f6f415cc4d93dc18eb4af32c78e3d5289a184ea97cffacfa6cefaff14c51027",
+      "text": "SELECT exp, level, role FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_autolevelup.js",
+          "line": 9
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "8fb6bfa77aa2407ca8f583e3eea13d8491211dea0c6243564784bb4b35892d50",
+      "text": "SELECT exp, level, role, money FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-levelup.js",
+          "line": 9
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "8fe79ad33977a926f86c09121f5df8793e0e60c5f213645f805b1b0d2f9c8005",
+      "text": "UPDATE group_settings SET sdemote = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/grupo-setConfig.js",
+          "line": 58
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "91065bdae8746b2d111e016f7518713cfb320e03fcac4154849189c3444267fb",
+      "text": "SELECT * FROM usuarios WHERE num = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "lib/simple.js",
+          "line": 151
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "91e3e0f3abe1231df8748497606bac9521c66b3712238e417ee23c4a155d4b58",
+      "text": "UPDATE characters SET claimed_by = $1, price = $2, for_sale = false, seller = null WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-vender.js",
+          "line": 112
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "940f65d86be6fe36251fb5bb15ba6bf683eb77b985a3570c2d98b1b380a4b823",
+      "text": "SELECT claimed_by FROM characters",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-Rantig.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "950c7e84fc9a095679268f1e1e406e85ae8ef74757f49fb083e5e4fb6acffc79",
+      "text": "UPDATE usuarios SET exp = exp + $1 WHERE id = $2 RETURNING exp",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-add.js",
+          "line": 34
+        }
+      ],
+      "scopes": [
+        "users:write",
+        "official:admin"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "954b6df3ba9a8d3f53b235dc0c08415c1176380be570861dcab5dcdd2689fb76",
+      "text": "SELECT id, nombre, dailystreak, lastclaim \n    FROM usuarios \n    WHERE dailystreak > 0\n    ORDER BY dailystreak DESC",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/rpg-top-rachas.js",
+          "line": 8
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "96607379cf8d8f454dc643a90a302f0eecdf85099d2209016e9d41ef03f14d6a",
+      "text": "UPDATE usuarios SET limite = 0, banco = banco + $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-banc.js",
+          "line": 12
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "97b4b02124025950e2cad92957af011059abc03a2e3dac910fe2c4caae15b3c1",
+      "text": "SELECT * FROM usuarios WHERE lid = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "lib/simple.js",
+          "line": 146
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "98d4e713166ffa96fc5cd47a131bf6121c3e149aa02df90f3e134de091d0d291",
+      "text": "UPDATE usuarios \n      SET exp = exp + $1, lastclaim = $2, dailystreak = $3\n      WHERE id = $4",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "plugins/rpg-daily.js",
+          "line": 31
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "9b5572c445985c06cf52fb2b7aa4460d42f979a3b14e5d10bbae5ee7f0182f08",
+      "text": "UPDATE usuarios SET marry = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 40
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "9c4db61e8e334128eb457f0ac491649a99c7a66d108afbc383f899ee6ad1208b",
+      "text": "UPDATE chats SET joined = false\n      WHERE id = $1 AND bot_id = $2",
+      "access": "write",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 153
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "9d1160d1baa8cde1ef54f4f13ba23c0c9e61cf14fa793fad78281e62289d3338",
+      "text": "UPDATE usuarios SET lid = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 553
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "9d3dd48434b1dc5876eda7a1f847e72ebc35d6020a074f7f32726966d5fb40ac",
+      "text": "SELECT chat_memory.chat_id, chat_memory.updated_at, \n             COALESCE(group_settings.memory_ttl, 86400) AS memory_ttl\n      FROM chat_memory\n      JOIN group_settings ON chat_memory.chat_id = group_settings.group_id\n      WHERE group_settings.memory_ttl > 0",
+      "access": "read",
+      "tables": [
+        "group_settings",
+        "chat_memory"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 829
+        }
+      ],
+      "scopes": [
+        "groups:read",
+        "memory:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "9d73c078c31b1e28cf35ebc9e39b94bca6340fd612da70603d26a995792fb2a0",
+      "text": "SELECT exp, limite, money, lastclaim, dailystreak FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-daily.js",
+          "line": 9
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "a0b34895a18326f5b504709399a8ec594e0ed25b2f3edcfa115c8c68f4e89f7f",
+      "text": "UPDATE usuarios SET marry_request = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 21
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "a29ee3f64e9d9021404ba411b162ac2b7ab8d46e861e6c3c2a0263e02c061d5f",
+      "text": "UPDATE group_settings SET detect = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 69
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "a2f00617b7a1d9fbcc0ce8db39a7940fa25250baba7379b6d0a5fb9ff0ee80e0",
+      "text": "SELECT * FROM subbots WHERE $1::text IS NULL OR tipo = $1 ORDER BY id",
+      "access": "read",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/owner-test.js",
+          "line": 11
+        }
+      ],
+      "scopes": [
+        "bots:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "a304c7133d6b60b7767fe8f2eadb3ead25d1a36e4d6a48706dbd673660d6c104",
+      "text": "SELECT * FROM characters WHERE LOWER(name) = $1",
+      "access": "read",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-retirar.js",
+          "line": 10
+        }
+      ],
+      "scopes": [
+        "characters:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "a41ed1e11d317bc69ee30624eeff15b06e57d77d8c817ed1353d8893eb9a5e7a",
+      "text": "UPDATE characters SET for_sale = false, seller = null, last_removed_time = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-retirar.js",
+          "line": 16
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "a612e5a25f4dd448855540b34089374754e896721eae4453e892d9beee98a261",
+      "text": "SELECT audios FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_audios.js",
+          "line": 43
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "a6ce9d0cc42baf25753c6507a94c31f7c3e91af93cd08e48d7061b74de6023f2",
+      "text": "INSERT INTO group_settings (group_id) VALUES ($1) ON CONFLICT DO NOTHING",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 61
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 68
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 75
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 82
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 89
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 96
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 103
+        },
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 110
+        },
+        {
+          "file": "plugins/grupo-setConfig.js",
+          "line": 34
+        },
+        {
+          "file": "plugins/grupo-sethorario.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "a8330eaa89c60fbefeef58ab0bf57281d73b4b45b493092e788c19c2d05141a8",
+      "text": "INSERT INTO group_settings (group_id, expired) VALUES ($1, $2) ON CONFLICT (group_id) DO UPDATE SET expired = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-join.js",
+          "line": 73
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "a89fc29aab56baffe5914474df7c8da4afb6f6be599939e9310ea27972652eda",
+      "text": "UPDATE subbots SET name = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-setbotname.js",
+          "line": 8
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "a8f4536a7652f875ead6935a8c8690108a63997b524f64bf39e08c3bc8eae6d8",
+      "text": "SELECT ry_time FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 55
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "a90c3ed196f2d0b9c0bab266185d79e98c5a8d37e31201d088e2779b68c2df31",
+      "text": "UPDATE group_settings SET spromote = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/grupo-setConfig.js",
+          "line": 53
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "ab702fb6d353653fb80f3ff21b77c935dcb47cab0c2b7613ae87d936aa5d3e04",
+      "text": "UPDATE usuarios SET warn_pv = true WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_antiprivado.js",
+          "line": 46
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "ac86a2bf2878f21f39863e3a404d9afbf63674fd7cb477fc9a09207cdfaa7b57",
+      "text": "SELECT limite, banco FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-banc.js",
+          "line": 2
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "ad617ca17ed159418b1589bd8657c28a4f8c357f510b050708b7df03ba44801f",
+      "text": "UPDATE group_settings SET welcome = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 62
+        },
+        {
+          "file": "plugins/grupo-fantasmas.js",
+          "line": 65
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "b035ba32db2e705bef226a22867c7268ba60e8289e4f03b55a7f2e22ff50479e",
+      "text": "UPDATE usuarios\n      SET sticker_packname = $1,\n          sticker_author = $2\n      WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/sticker-exif.js",
+          "line": 14
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "b32afabc1f845ac9b21c3e442681aec13b9d9bf262e308ea48b1465ccc2d4249",
+      "text": "SELECT sticker_packname, sticker_author FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/sticker-attp y ttp.js",
+          "line": 6
+        },
+        {
+          "file": "plugins/sticker-emojimix.js",
+          "line": 13
+        },
+        {
+          "file": "plugins/sticker-pack.js",
+          "line": 16
+        },
+        {
+          "file": "plugins/sticker-qc.js",
+          "line": 5
+        },
+        {
+          "file": "plugins/sticker-sticker.js",
+          "line": 8
+        },
+        {
+          "file": "plugins/sticker-telegram.js",
+          "line": 23
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "b5689360c8e835606701eddcd3560790e16a2d54e90de8b8c92f474146598839",
+      "text": "UPDATE group_settings SET antilink = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 76
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "b5cb5e0b0de17bd232fceccc6ca11bd578096a6e5fe359dbeb0fccd6e989eacc",
+      "text": "UPDATE group_settings SET memory_ttl = 0 WHERE group_id = $1",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-setprompt.js",
+          "line": 37
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "b8defc56c2d705d75391efae05afb8125aa599e45716b47fe6116c0baced1ad6",
+      "text": "SELECT COUNT(*) FROM chats",
+      "access": "read",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/owner-db.js",
+          "line": 12
+        }
+      ],
+      "scopes": [
+        "groups:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "b9c229a6a4e460d818b70e73b940f5ca980c41a2718618bc92b46d91ef913117",
+      "text": "UPDATE usuarios SET limite = GREATEST(limite - $1, 0), money = GREATEST(money - $2, 0), crime = $3 WHERE id = $4",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 35
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "ba3611b9d260f4dc62e06e504637f52ccc9f74161cb7f95b7fb241acb9d3d970",
+      "text": "UPDATE characters SET claimed_by = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw-regalar.js",
+          "line": 20
+        },
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 139
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "bdcb384dcab623e1e02cc9c32a7044a216f394dea4f557175963ede1c0e6c0f2",
+      "text": "UPDATE usuarios SET exp = exp + $1, crime = $2 WHERE id = $3",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 3,
+      "sources": [
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 23
+        },
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 39
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "be74f776782e4eb5ba7f9375be08e3609f349e5987b89ed12445cec903e7c972",
+      "text": "INSERT INTO messages (user_id, group_id, message_count)\n      VALUES ($1, $2, 1)\n      ON CONFLICT (user_id, group_id)\n      DO UPDATE SET message_count = messages.message_count + 1",
+      "access": "write",
+      "tables": [
+        "messages"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 409
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "be8cb688b29db2aeebf743a218fa9a4fe4d10f671d4d74d9ab0f5b4e6c0ce943",
+      "text": "SELECT banned, razon_ban, avisos_ban FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 664
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "beaa6f1e880ff9bea1f0283a7096fd81088c180848ed13b0fb1b660ba720a060",
+      "text": "SELECT id, nombre, exp, limite, money, banco FROM usuarios",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/rpg-leaderboard.js",
+          "line": 21
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "bf178ce19c94442081325babb96d2c33f79378915df145ed05cfbbce29416c0b",
+      "text": "SELECT \n        COUNT(*) AS total,\n        COUNT(*) FILTER (WHERE tipo = 'oficial') AS oficiales,\n        COUNT(*) FILTER (WHERE tipo = 'subbot') AS subbots\n      FROM subbots",
+      "access": "read",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/owner-test.js",
+          "line": 12
+        }
+      ],
+      "scopes": [
+        "bots:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "c1d82af46716427c7e92c0136dc5fb1d951c8cbcf57280b253ce43db478bd4b6",
+      "text": "DELETE FROM messages\n    WHERE user_id = $1 AND group_id = $2",
+      "access": "write",
+      "tables": [
+        "messages"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 149
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "c284b95825d334b3c5c6b2139bb22d53ed27d20e5b93a7e95fdb91a1f5a51a7a",
+      "text": "SELECT level FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 736
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "c2bb2e6bcea6677f6c893e716eb37be3989234dac5a488bbee875780f2829b9b",
+      "text": "UPDATE usuarios SET warn = warn + 1 WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-warn.js",
+          "line": 32
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "c46bbf0ee973e5d993420bf6f3d147d71b277b871a892797a36331c994934f30",
+      "text": "SELECT joined FROM chats\n  WHERE is_group = true AND bot_id = $1",
+      "access": "read",
+      "tables": [
+        "chats"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/info-infobot.js",
+          "line": 64
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "c4ff3aebc9195cc4905366e52290d115dba0f280a1c7a6b3749b9dfe0101e5ad",
+      "text": "UPDATE usuarios\n      SET registered = false,\n          nombre = NULL,\n          edad = NULL,\n          gender = NULL,\n          birthday = NULL,\n          email = NULL,\n          money = GREATEST(COALESCE(money, 0) - 400, 0),\n          limite = GREATEST(COALESCE(limite, 0) - 2, 0),\n          exp = GREATEST(COALESCE(exp, 0) - 150, 0),\n          reg_time = NULL,\n          serial_number = NULL\n      WHERE id = $1\n        AND registered = true\n        AND COALESCE(serial_number, md5(id)) = $2\n      RETURNING id",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-reg.js",
+          "line": 43
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "c5da49f969be6b140ddaf166f4407767e6114f061cebe1df97f910a0474fe35f",
+      "text": "UPDATE usuarios SET limite = limite - $1, banco = banco + $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-banc.js",
+          "line": 21
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "c77aabfe147cb10c105066312b6d092663f23330306586925d8e8d25993d3081",
+      "text": "SELECT history, updated_at FROM chat_memory WHERE chat_id = $1",
+      "access": "read",
+      "tables": [
+        "chat_memory"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_autoresponder.js",
+          "line": 58
+        },
+        {
+          "file": "plugins/herramientas-chagpt.js",
+          "line": 33
+        }
+      ],
+      "scopes": [
+        "memory:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "c825b3f75c3b2614f50083216d354665f436b027be55bf9c314a71adb6c2dc75",
+      "text": "UPDATE usuarios SET warn = 0 WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-warn.js",
+          "line": 38
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "c8f554ba9b7b267c7ae1611156bb791a927f6ec2ef6158f156f3a49408cf1336",
+      "text": "UPDATE usuarios SET banco = banco - $1, limite = limite + $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-banc.js",
+          "line": 39
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "cc61371685a8ad8d956bc07cb710a676a890ff338c564e3a0541a336091b6c7b",
+      "text": "SELECT id, warn FROM usuarios WHERE warn > 0",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/grupo-listwarn.js",
+          "line": 6
+        },
+        {
+          "file": "plugins/herramientas-list.js",
+          "line": 84
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "ce8075cb000760dcfb5a6d01a66a13dd8cfe4bf7a62eee4009715d1afa4a664d",
+      "text": "DELETE FROM chat_memory WHERE chat_id = $1",
+      "access": "write",
+      "tables": [
+        "chat_memory"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 843
+        },
+        {
+          "file": "plugins/grupo-setprompt.js",
+          "line": 22
+        },
+        {
+          "file": "plugins/grupo-setprompt.js",
+          "line": 75
+        }
+      ],
+      "scopes": [
+        "memory:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "d53eec515110f30ba49d6bbdb5ce67c8b49440db558624e01a12766884f88bfd",
+      "text": "UPDATE group_settings SET expired = NULL WHERE group_id = $1",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 795
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "da669593eb44990a4a737082279d00a840eebca2a3b03cc45a7d8412c6cc8020",
+      "text": "INSERT INTO subbots (id, privacy)\n        VALUES ($1, $2)\n        ON CONFLICT (id) DO UPDATE SET privacy = $2 RETURNING privacy",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/jadi-privacidad.js",
+          "line": 13
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "da7ee9f79d2e06e8cbab1d93bad82f98203939000669aaa3ad09139cfb0bd74c",
+      "text": "UPDATE usuarios SET ry_time = $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 98
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "daa6b1496d582ab58e1b5516c2756c021e64f80d0fd99c937190beed57e77a24",
+      "text": "UPDATE usuarios SET limite = limite - $1 WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 715
+        },
+        {
+          "file": "plugins/owner-join.js",
+          "line": 56
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "dd57705cd83285b403b8d1e7723ccc95046906360d92da2f1cceb5fe6206626d",
+      "text": "UPDATE group_settings SET modoadmin = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 111
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "de4bafa9b54015f982d3310b5cc35c63844c29f1ea6d040d3c533d3635295b3c",
+      "text": "SELECT modohorny, nsfw_horario FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 632
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "dfb3bc779b67767cbe0c9087acb5fa133cb654e0f5ae0d81f056668fd09feb59",
+      "text": "SELECT num FROM usuarios WHERE lid = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-groupInfo.js",
+          "line": 18
+        },
+        {
+          "file": "plugins/rpg-add.js",
+          "line": 9
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "e135efffd5697ca120abe145cc2d79e304afcc1973d0537b6cfe1d3cd5d3c069",
+      "text": "UPDATE group_settings SET primary_bot = NULL WHERE group_id = $1",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 523
+        },
+        {
+          "file": "plugins/jadi-setprimary.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "e15b7bd0466c1a04089b5289b72998ae091e8522014758294454cd9ecc1aa75d",
+      "text": "SELECT * FROM subbots WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "lib/postgres.js",
+          "line": 359
+        }
+      ],
+      "scopes": [
+        "bots:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "e6e59c777bade65485572c0b095520ab6ac0ad3e4c56587ad768716fbf5d949d",
+      "text": "SELECT COUNT(*)::int FROM usuarios WHERE registered = true",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/info-infobot.js",
+          "line": 81
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "e7a0cd32a05741dcb8f5746b90854cfd944045f9a889d1aab60eee0e95e91479",
+      "text": "UPDATE usuarios SET avisos_ban = $2 WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 669
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "e8ad0310d552e213fd01b940d092bbe3accb8575888e7f421f34a5cd8cb2ec4f",
+      "text": "INSERT INTO subbots (id, owners)\n        VALUES ($1, $2)\n        ON CONFLICT (id) DO UPDATE SET owners = $2 RETURNING owners",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-addowner.js",
+          "line": 21
+        },
+        {
+          "file": "plugins/owner-addowner.js",
+          "line": 31
+        }
+      ],
+      "scopes": [
+        "bots:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "e99fc350eb36089c38cd7a37e7e03e271d9244cfcdb596f8ae6eee95a3cd9734",
+      "text": "WITH accounts AS MATERIALIZED (\n    SELECT id, COALESCE(exp, 0) AS exp, COALESCE(money, 0) AS money,\n           COALESCE(limite, 0) AS limite\n    FROM usuarios\n    WHERE id IN ($3, $4)\n    FOR UPDATE\n  ),\n  eligibility AS (\n    SELECT COUNT(*) = 2\n      AND $3 <> $4\n      AND $1 IN ('exp', 'money', 'limite')\n      AND MAX(CASE WHEN id = $3 THEN\n        CASE $1 WHEN 'exp' THEN exp WHEN 'money' THEN money ELSE limite END\n      END) >= $2\n      AND MAX(CASE WHEN id = $4 THEN\n        CASE $1 WHEN 'exp' THEN exp WHEN 'money' THEN money ELSE limite END\n      END) <= 2147483647 - $2 AS allowed\n    FROM accounts\n  ),\n  updated AS (\n    UPDATE usuarios AS u\n    SET exp = CASE WHEN $1 = 'exp'\n          THEN COALESCE(u.exp, 0) + CASE WHEN u.id = $3 THEN -$2 ELSE $2 END\n          ELSE u.exp END,\n        money = CASE WHEN $1 = 'money'\n          THEN COALESCE(u.money, 0) + CASE WHEN u.id = $3 THEN -$2 ELSE $2 END\n          ELSE u.money END,\n        limite = CASE WHEN $1 = 'limite'\n          THEN COALESCE(u.limite, 0) + CASE WHEN u.id = $3 THEN -$2 ELSE $2 END\n          ELSE u.limite END\n    WHERE u.id IN ($3, $4) AND (SELECT allowed FROM eligibility)\n    RETURNING u.id\n  )\n  SELECT COUNT(*) = 2 AS transferred FROM updated",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 4,
+      "sources": [
+        {
+          "file": "plugins/rpg-transfer.js",
+          "line": 83
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "ebb57357bf850182fb0dbdaad374892d3ec6ce03ad6e512c707a757d7254ce22",
+      "text": "SELECT antifake FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 418
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "ebf2095c9bcb4b56c5810ae6f8056d5896676814aa903ee540aeb81b28e7292d",
+      "text": "UPDATE usuarios SET banned = true, razon_ban = $2 WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/owner-banUser.js",
+          "line": 24
+        }
+      ],
+      "scopes": [
+        "users:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "ece64f03f76e847c20a09e74205fc32739fd02b3311b893079e849893ddcd710",
+      "text": "SELECT exp, lastrob FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-rob.js",
+          "line": 5
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "ecfbf5cde3c1efc7b7e6032b267e01acaca1edda022972f437b15e91af78f412",
+      "text": "UPDATE group_settings SET primary_bot = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/jadi-setprimary.js",
+          "line": 20
+        },
+        {
+          "file": "plugins/jadi-setprimary.js",
+          "line": 24
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "ee063cc7f3a23ee9fda37f4f11917bde8b6631aee9ca586c746af6df43a6db64",
+      "text": "WITH candidate AS MATERIALIZED (\n      SELECT id,\n             COALESCE(exp, 0) AS exp,\n             COALESCE(lastwork, 0) AS lastwork,\n             FLOOR(EXTRACT(EPOCH FROM clock_timestamp()) * 1000)::bigint AS now_ms,\n             FLOOR(random() * 6500)::integer AS reward\n      FROM usuarios\n      WHERE id = $1\n      FOR UPDATE\n    ),\n    updated AS (\n      UPDATE usuarios AS u\n      SET exp = LEAST(2147483647, c.exp::bigint + c.reward)::integer,\n          lastwork = c.now_ms\n      FROM candidate AS c\n      WHERE u.id = c.id\n        AND c.lastwork + 600000 <= c.now_ms\n      RETURNING c.reward, u.lastwork\n    )\n    SELECT reward, lastwork, 0::bigint AS remaining_ms\n    FROM updated\n    UNION ALL\n    SELECT NULL::integer, c.lastwork,\n           GREATEST(0, c.lastwork + 600000 - c.now_ms)::bigint AS remaining_ms\n    FROM candidate AS c\n    WHERE NOT EXISTS (SELECT 1 FROM updated)",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-work.js",
+          "line": 2
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "economy"
+    },
+    {
+      "id": "f12ff4339a54d2727c2ec10c51f35c8c8c39ad8bcd355808844cbf9ef3bf86bc",
+      "text": "SELECT exp, limite, money, crime FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/rpg-crime.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "f32cfd0317be78b7919e7350a3a5304c7766208706e7fd8b259e5f51f93a7735",
+      "text": "SELECT autolevelup FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_autolevelup.js",
+          "line": 6
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "f3dc54c8612a006e6f6fb57335ad8dce189e8713bbdaf1cbef2e9cfffb1f1f51",
+      "text": "SELECT COALESCE(SUM(message_count), 0) AS total FROM messages",
+      "access": "read",
+      "tables": [
+        "messages"
+      ],
+      "parameterCount": 0,
+      "sources": [
+        {
+          "file": "plugins/owner-db.js",
+          "line": 14
+        }
+      ],
+      "scopes": [
+        "groups:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "f4234b61c5fe679923dd03a368fe9ca54adf07a3deb4ea2dfc3add8126783fed",
+      "text": "UPDATE usuarios SET banned = false, avisos_ban = 0, razon_ban = NULL WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/owner-banUser.js",
+          "line": 33
+        }
+      ],
+      "scopes": [
+        "users:write",
+        "official:admin"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "f50ff91a469c13ce172cd5c16116efd8e57cb874a8f6cbd8dbd214157befc670",
+      "text": "SELECT antilink FROM group_settings WHERE group_id = $1",
+      "access": "read",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/_antilink.js",
+          "line": 13
+        }
+      ],
+      "scopes": [
+        "groups:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "f552f7c4eb46dbb068bb452a8d9a50b676aaa9572fb37c8a0b8780b9f4f83551",
+      "text": "INSERT INTO subbots (id, anti_private)\n    VALUES ($1, $2)\n    ON CONFLICT (id) DO UPDATE SET anti_private = $2",
+      "access": "write",
+      "tables": [
+        "subbots"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 116
+        }
+      ],
+      "scopes": [
+        "bots:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "f8fa7fda7e01774481d620fa901ca1b391159e3999d965f5d47bd00977480a85",
+      "text": "UPDATE usuarios SET marry = $1, marry_request = NULL WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-pareja.js",
+          "line": 39
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "fbe0a0388280cebdeed4f90e8b7071863b3b03c07cf51a20392df854612ce46d",
+      "text": "UPDATE group_settings SET antiporn = $1 WHERE group_id = $2",
+      "access": "write",
+      "tables": [
+        "group_settings"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/config-on y off.js",
+          "line": 90
+        }
+      ],
+      "scopes": [
+        "groups:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "fd7bd263a95738957699a6af59ec8b9e5fe6c9a9bf576bf613a1a0e3e8403ccc",
+      "text": "UPDATE usuarios\n        SET warn = warn - 1\n        WHERE id = $1",
+      "access": "write",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/grupo-delwarn.js",
+          "line": 18
+        }
+      ],
+      "scopes": [
+        "users:write"
+      ],
+      "risk": "write"
+    },
+    {
+      "id": "fd938bb07f8dca583c00ab280cc2a7d5d68001476737af1f79731ff3412561ab",
+      "text": "SELECT id FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "plugins/owner-banUser.js",
+          "line": 18
+        },
+        {
+          "file": "plugins/rpg-add.js",
+          "line": 19
+        }
+      ],
+      "scopes": [
+        "users:read",
+        "official:admin"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "fe016dfe7d2f92ee365862b8008a5f9c5661a3d9195c135720cdd67d508aeb24",
+      "text": "SELECT money FROM usuarios WHERE id = $1",
+      "access": "read",
+      "tables": [
+        "usuarios"
+      ],
+      "parameterCount": 1,
+      "sources": [
+        {
+          "file": "handler.js",
+          "line": 721
+        }
+      ],
+      "scopes": [
+        "users:read"
+      ],
+      "risk": "read"
+    },
+    {
+      "id": "fe202f98b5a687a2125b0359ea97483986b3b27fa9b62c2479d4ae150030065a",
+      "text": "UPDATE characters SET claimed_by = $1, for_sale = false, seller = null WHERE id = $2",
+      "access": "write",
+      "tables": [
+        "characters"
+      ],
+      "parameterCount": 2,
+      "sources": [
+        {
+          "file": "plugins/rpg-rw.js",
+          "line": 123
+        }
+      ],
+      "scopes": [
+        "characters:write"
+      ],
+      "risk": "economy"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+services:
+  kantu-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kantu-bot:2.2.0
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HEALTH_ENABLED: "true"
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: "3000"
+      FFMPEG_PATH: /usr/bin/ffmpeg
+      BOT_SESSION_DIR: /app/BotSession
+      SUBBOT_SESSION_DIR: /app/jadibot
+      TMP_DIR: /app/tmp
+      BACKUP_DIR: /app/backups
+      DATA_DIR: /app/data
+    ports:
+      - "${HEALTH_BIND_ADDRESS:-127.0.0.1}:${HEALTH_PORT_EXTERNAL:-3000}:3000"
+    volumes:
+      - ./.env:/app/.env:ro
+      - kantu-session:/app/BotSession
+      - kantu-subbots:/app/jadibot
+      - kantu-backups:/app/backups
+      - kantu-data:/app/data
+    tmpfs:
+      - /app/tmp:rw,noexec,nosuid,size=256m,uid=1000,gid=1000
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    cpus: 1.5
+    stop_grace_period: 20s
+
+volumes:
+  kantu-session:
+  kantu-subbots:
+  kantu-backups:
+  kantu-data:
