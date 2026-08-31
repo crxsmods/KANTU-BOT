@@ -169,7 +169,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 811
+          "line": 815
         }
       ],
       "scopes": [
@@ -283,7 +283,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 818
+          "line": 822
         }
       ],
       "scopes": [
@@ -2285,7 +2285,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 826
+          "line": 830
         }
       ],
       "scopes": [
@@ -3088,7 +3088,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 840
+          "line": 844
         },
         {
           "file": "plugins/grupo-setprompt.js",

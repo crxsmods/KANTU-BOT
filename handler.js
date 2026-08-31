@@ -797,16 +797,20 @@ console.log(`[AUTO-LEAVE] Bot salió automáticamente del grupo: ${group_id}`);
 }}, 60_000); //1 min
 
 //report
-const reportGroupJid = (process.env.REPORT_GROUP_JID || '').trim();
+const reportEnv = (process.env.REPORT_GROUP_JID || '').trim();
+const reportDest = /^\d{10,22}@(g\.us|s\.whatsapp\.net)$/.test(reportEnv)
+  ? reportEnv
+  : '5217121649714@s.whatsapp.net';
 managedInterval(async () => {
-if (!/^\d{10,22}@g\.us$/.test(reportGroupJid)) return;
 try {
 let conn = global.conn || globalThis.conn;
 if (!conn || typeof conn.sendMessage !== "function") return;
+if (reportDest.endsWith('@g.us')) {
 try {
-await conn.groupMetadata(reportGroupJid);
+await conn.groupMetadata(reportDest);
 } catch (e) {
 return;
+}
 }
 const res = await db.query("SELECT * FROM reportes WHERE enviado = false ORDER BY fecha ASC LIMIT 10");
 if (!res.rows.length) return;
@@ -814,7 +818,7 @@ if (!res.rows.length) return;
 for (const row of res.rows) {
 let cabecera = row.tipo === "sugerencia" ? "🌟 *SUGERENCIA*" : "ＲＥＰＯＲＴＥ";
 const txt = `┏╼╾╼⧼⧼⧼ ${cabecera}  ⧽⧽⧽╼╼╼┓\n╏• *Usuario:* wa.me/${row.sender_id.split("@")[0]}\n╏• ${row.tipo === "sugerencia" ? "*Sugerencia:*" : "*Mensaje:*"} ${row.mensaje}\n┗╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼`;
-await conn.sendMessage(reportGroupJid, { text: txt });
+await conn.sendMessage(reportDest, { text: txt });
 await db.query("DELETE FROM reportes WHERE id = $1", [row.id]);
 }} catch (err) {
 console.error("[REPORT/SUGGE SYSTEM ERROR]", err);
