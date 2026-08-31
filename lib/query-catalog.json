@@ -169,7 +169,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 814
+          "line": 811
         }
       ],
       "scopes": [
@@ -226,7 +226,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 552
+          "line": 549
         }
       ],
       "scopes": [
@@ -283,7 +283,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 821
+          "line": 818
         }
       ],
       "scopes": [
@@ -341,7 +341,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 623
+          "line": 620
         }
       ],
       "scopes": [
@@ -398,7 +398,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 707
+          "line": 704
         },
         {
           "file": "plugins/owner-join.js",
@@ -421,7 +421,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 543
+          "line": 540
         }
       ],
       "scopes": [
@@ -440,7 +440,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 355
+          "line": 352
         }
       ],
       "scopes": [
@@ -865,7 +865,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 699
+          "line": 696
         },
         {
           "file": "lib/simple.js",
@@ -928,7 +928,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 788
+          "line": 785
         }
       ],
       "scopes": [
@@ -947,7 +947,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 772
+          "line": 769
         }
       ],
       "scopes": [
@@ -1158,7 +1158,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 728
+          "line": 725
         }
       ],
       "scopes": [
@@ -1377,7 +1377,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 368
+          "line": 365
         }
       ],
       "scopes": [
@@ -1589,11 +1589,11 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 69
+          "line": 66
         },
         {
           "file": "handler.js",
-          "line": 277
+          "line": 274
         },
         {
           "file": "lib/simple.js",
@@ -1998,7 +1998,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 513
+          "line": 510
         }
       ],
       "scopes": [
@@ -2246,7 +2246,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 153
+          "line": 150
         }
       ],
       "scopes": [
@@ -2265,7 +2265,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 553
+          "line": 550
         }
       ],
       "scopes": [
@@ -2285,7 +2285,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 829
+          "line": 826
         }
       ],
       "scopes": [
@@ -2813,7 +2813,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 409
+          "line": 406
         }
       ],
       "scopes": [
@@ -2832,7 +2832,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 664
+          "line": 661
         }
       ],
       "scopes": [
@@ -2890,7 +2890,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 149
+          "line": 146
         }
       ],
       "scopes": [
@@ -2909,7 +2909,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 736
+          "line": 733
         }
       ],
       "scopes": [
@@ -3088,7 +3088,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 843
+          "line": 840
         },
         {
           "file": "plugins/grupo-setprompt.js",
@@ -3115,7 +3115,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 795
+          "line": 792
         }
       ],
       "scopes": [
@@ -3173,7 +3173,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 715
+          "line": 712
         },
         {
           "file": "plugins/owner-join.js",
@@ -3215,7 +3215,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 632
+          "line": 629
         }
       ],
       "scopes": [
@@ -3257,7 +3257,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 523
+          "line": 520
         },
         {
           "file": "plugins/jadi-setprimary.js",
@@ -3318,7 +3318,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 669
+          "line": 666
         }
       ],
       "scopes": [
@@ -3380,7 +3380,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 418
+          "line": 415
         }
       ],
       "scopes": [
@@ -3677,7 +3677,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 721
+          "line": 718
         }
       ],
       "scopes": [

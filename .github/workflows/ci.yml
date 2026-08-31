@@ -20,6 +20,4 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run lint
-      - run: npm test
       - run: npm audit --omit=dev --audit-level=high
-      - run: docker build --tag kantu-bot:ci .

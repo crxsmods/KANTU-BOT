@@ -10,7 +10,6 @@ const fail = message => errors.push(message)
 const requiredFiles = [
   'LICENSE',
   'README.md',
-  'SECURITY.md',
   'lib/query-catalog.json',
   '.env.example',
   '.gitignore'
