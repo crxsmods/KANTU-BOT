@@ -108,7 +108,9 @@ const teks = `*≡ INFOBOT (PÚBLICO)*
 ▣ *Plataforma:* ${sistema.plataforma}
 ▣ *RAM usada:* ${sistema.usoRam}
 ▣ *Uso de CPU:* ${sistema.usoCpu}
-▣ *Uptime:* ${sistema.tiempoActividad}`;
+▣ *Uptime:* ${sistema.tiempoActividad}
+
+> https://kxntu.com`;
 await conn.sendMessage(m.chat, {text: teks, contextInfo: { mentionedJid: null, forwardingScore: 1, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363371008200788@newsletter",newsletterName: "Kantu Bot Ofc ⚡" }, externalAdReply : {mediaUrl:  [info.nna, info.nna2, info.md].getRandom(), mediaType: 2, description: null, title: `INFO - BOT`, previewType: 0, thumbnailUrl: info.img2 || undefined, sourceUrl: info.yt}}}, { quoted: m })
 };
 handler.help = ['infobot']

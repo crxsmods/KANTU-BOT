@@ -264,7 +264,7 @@
       "sources": [
         {
           "file": "plugins/main-menu.js",
-          "line": 108
+          "line": 112
         }
       ],
       "scopes": [
@@ -885,7 +885,7 @@
         },
         {
           "file": "plugins/main-menu.js",
-          "line": 99
+          "line": 103
         },
         {
           "file": "plugins/rpg-perfil.js",

@@ -11,7 +11,9 @@ const handler = async m => {
     '3. Inicia con npm start.',
     '',
     'No necesitas base de datos: se crea sola en la carpeta database/.',
-    'Nunca compartas .env, tokens ni creds.json.'
+    'Nunca compartas .env, tokens ni creds.json.',
+    '',
+    '> https://kxntu.com'
   ].join('\n')
   await m.reply(text)
 }

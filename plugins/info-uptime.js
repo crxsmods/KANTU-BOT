@@ -1,7 +1,7 @@
 const handler = async (m) => {
 const uptime = process.uptime() * 1000 // en milisegundos
 const tiempo = clockString(uptime)
-m.reply(`⏱️ *Uptime:* ${tiempo}`)
+m.reply(`⏱️ *Uptime:* ${tiempo}\n\n> https://kxntu.com`)
 }
 handler.help = ['uptime'];
 handler.tags = ['main'];

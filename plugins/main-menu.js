@@ -30,8 +30,9 @@ const tags = {
 
 const defaultMenu = {
   before: `> ⭐ B0T PÚBLICO ⭐
- 
- ╰┈➤  𝐊𝐚𝐧𝐭𝐮 - 𝐁𝐨𝐭 
+> 🌐 https://kxntu.com
+
+ ╰┈➤  𝐊𝐚𝐧𝐭𝐮 - 𝐁𝐨𝐭
  
 ┏──────────────
 ┊ 『 Info User 』
@@ -59,12 +60,15 @@ const defaultMenu = {
 ╰─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ⭒
 
 
-┊--DOWLOAD APP
-┊--DESCARGA MI APP
+┊--📥 DESCARGA MI APP
+┊--🎬 *KantuFlix* » https://kxntu.com
+┊--🌐 *Web* » https://kxntu.com
 
 
 > *Puede hablar con bot de esta forma ej:*
 @%BoTag ¿QUIEN ERES?
+
+> https://kxntu.com
 `.trimStart(),
   header: '┏──────────────\n┊『 %category 』\n┊\n┊ 「 ꛕ 」 𝑫𝒆𝒗 𝑪𝒓𝒙𝒔𝑴𝒐𝒅𝒔\n┗─────────────❐ ',
   body: ' │ᐉⴰ💎┊ %cmd %islimit %isPremium',
