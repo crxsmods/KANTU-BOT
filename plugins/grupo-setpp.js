@@ -1,4 +1,4 @@
-import * as Jimp from "jimp";
+import { Jimp, JimpMime } from "jimp";
 import { S_WHATSAPP_NET } from "@whiskeysockets/baileys";
 
 let handler = async (m, { conn }) => {
@@ -10,11 +10,10 @@ let handler = async (m, { conn }) => {
 
     async function processImage(media) {
       const image = await Jimp.read(media);
-      const resizedImage = image.getWidth() > image.getHeight()
-        ? image.resize(720, Jimp.AUTO)
-        : image.resize(Jimp.AUTO, 720);
+      if (image.width > image.height) image.resize({ w: 720 });
+      else image.resize({ h: 720 });
       return {
-        img: await resizedImage.getBufferAsync(Jimp.MIME_JPEG),
+        img: await image.getBuffer(JimpMime.jpeg),
       };
     }
 
