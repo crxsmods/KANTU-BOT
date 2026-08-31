@@ -93,7 +93,7 @@
       "sources": [
         {
           "file": "plugins/rpg-daily.js",
-          "line": 24
+          "line": 26
         }
       ],
       "scopes": [
@@ -169,7 +169,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 815
+          "line": 811
         }
       ],
       "scopes": [
@@ -226,7 +226,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 549
+          "line": 545
         }
       ],
       "scopes": [
@@ -283,7 +283,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 822
+          "line": 818
         }
       ],
       "scopes": [
@@ -322,7 +322,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 620
+          "line": 616
         }
       ],
       "scopes": [
@@ -379,7 +379,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 704
+          "line": 700
         },
         {
           "file": "plugins/owner-join.js",
@@ -402,7 +402,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 540
+          "line": 536
         }
       ],
       "scopes": [
@@ -505,7 +505,7 @@
       "sources": [
         {
           "file": "plugins/game-ppt.js",
-          "line": 13
+          "line": 15
         },
         {
           "file": "plugins/rpg-rob.js",
@@ -846,11 +846,11 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 696
+          "line": 692
         },
         {
           "file": "lib/simple.js",
-          "line": 143
+          "line": 148
         },
         {
           "file": "plugins/grupo-delwarn.js",
@@ -870,7 +870,7 @@
         },
         {
           "file": "plugins/rpg-perfil.js",
-          "line": 17
+          "line": 19
         },
         {
           "file": "plugins/rpg-reg.js",
@@ -909,7 +909,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 785
+          "line": 781
         }
       ],
       "scopes": [
@@ -928,7 +928,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 769
+          "line": 765
         }
       ],
       "scopes": [
@@ -1024,11 +1024,11 @@
       "sources": [
         {
           "file": "plugins/game-ppt.js",
-          "line": 27
+          "line": 29
         },
         {
           "file": "plugins/game-ppt.js",
-          "line": 112
+          "line": 114
         },
         {
           "file": "plugins/game-ttt.js",
@@ -1078,7 +1078,7 @@
       "sources": [
         {
           "file": "plugins/game-ppt.js",
-          "line": 32
+          "line": 34
         },
         {
           "file": "plugins/rpg-rw.js",
@@ -1139,7 +1139,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 725
+          "line": 721
         }
       ],
       "scopes": [
@@ -1178,7 +1178,7 @@
       "sources": [
         {
           "file": "lib/simple.js",
-          "line": 277
+          "line": 282
         },
         {
           "file": "plugins/rpg-pareja.js",
@@ -1186,7 +1186,7 @@
         },
         {
           "file": "plugins/rpg-perfil.js",
-          "line": 43
+          "line": 45
         }
       ],
       "scopes": [
@@ -1224,7 +1224,7 @@
       "sources": [
         {
           "file": "plugins/game-slot.js",
-          "line": 5
+          "line": 7
         }
       ],
       "scopes": [
@@ -1458,7 +1458,7 @@
       "sources": [
         {
           "file": "plugins/game-ppt.js",
-          "line": 113
+          "line": 115
         },
         {
           "file": "plugins/game-ttt.js",
@@ -1578,7 +1578,7 @@
         },
         {
           "file": "lib/simple.js",
-          "line": 162
+          "line": 167
         },
         {
           "file": "plugins/config-on y off.js",
@@ -1913,7 +1913,7 @@
       "sources": [
         {
           "file": "plugins/game-slot.js",
-          "line": 41
+          "line": 43
         }
       ],
       "scopes": [
@@ -1979,7 +1979,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 510
+          "line": 506
         }
       ],
       "scopes": [
@@ -2055,7 +2055,7 @@
       "sources": [
         {
           "file": "lib/simple.js",
-          "line": 151
+          "line": 156
         }
       ],
       "scopes": [
@@ -2170,7 +2170,7 @@
       "sources": [
         {
           "file": "lib/simple.js",
-          "line": 146
+          "line": 151
         }
       ],
       "scopes": [
@@ -2189,7 +2189,7 @@
       "sources": [
         {
           "file": "plugins/rpg-daily.js",
-          "line": 31
+          "line": 33
         }
       ],
       "scopes": [
@@ -2246,7 +2246,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 550
+          "line": 546
         }
       ],
       "scopes": [
@@ -2266,7 +2266,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 830
+          "line": 826
         }
       ],
       "scopes": [
@@ -2286,7 +2286,7 @@
       "sources": [
         {
           "file": "plugins/rpg-daily.js",
-          "line": 9
+          "line": 11
         }
       ],
       "scopes": [
@@ -2644,11 +2644,11 @@
         },
         {
           "file": "plugins/sticker-qc.js",
-          "line": 5
+          "line": 6
         },
         {
           "file": "plugins/sticker-sticker.js",
-          "line": 8
+          "line": 10
         },
         {
           "file": "plugins/sticker-telegram.js",
@@ -2794,7 +2794,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 406
+          "line": 402
         }
       ],
       "scopes": [
@@ -2813,7 +2813,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 661
+          "line": 657
         }
       ],
       "scopes": [
@@ -2890,7 +2890,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 733
+          "line": 729
         }
       ],
       "scopes": [
@@ -3069,7 +3069,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 844
+          "line": 840
         },
         {
           "file": "plugins/grupo-setprompt.js",
@@ -3096,7 +3096,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 792
+          "line": 788
         }
       ],
       "scopes": [
@@ -3154,7 +3154,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 712
+          "line": 708
         },
         {
           "file": "plugins/owner-join.js",
@@ -3196,7 +3196,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 629
+          "line": 625
         }
       ],
       "scopes": [
@@ -3238,7 +3238,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 520
+          "line": 516
         },
         {
           "file": "plugins/jadi-setprimary.js",
@@ -3299,7 +3299,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 666
+          "line": 662
         }
       ],
       "scopes": [
@@ -3361,7 +3361,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 415
+          "line": 411
         }
       ],
       "scopes": [
@@ -3658,7 +3658,7 @@
       "sources": [
         {
           "file": "handler.js",
-          "line": 718
+          "line": 714
         }
       ],
       "scopes": [

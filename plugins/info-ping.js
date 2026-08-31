@@ -1,6 +1,8 @@
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363417790731866@newsletter', newsletterName: 'KantuBot Test ✨' } };
+
 const handler = async (m, { conn }) => {
 const start = performance.now();
-let { key } = await conn.sendMessage(m.chat, { text: '⏱️ ping...' }, { quoted: m });
+let { key } = await conn.sendMessage(m.chat, { text: '⏱️ ping...', contextInfo: CANAL }, { quoted: m });
 const end = performance.now();
 const ping = (end - start).toFixed(0);
 await conn.sendMessage(m.chat, { text: `🏓 *Pong!* ${ping}ms`, edit: key }, { quoted: m });

@@ -2,6 +2,7 @@ import axios from 'axios';
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 const userRequests = {};
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } };
 
 const handler = async (m, { conn, text, args, usedPrefix, command }) => {
 // 1. Mensaje de uso inicial
@@ -49,7 +50,7 @@ continue;
 if (!videoUrl) throw new Error('No se pudo obtener el recurso.');
 
 // 4. Envío del archivo con caption profesional
-await conn.sendFile(m.chat, videoUrl, 'tt.mp4', `「 ꛕ 」 *VIDEO DE TIKTOK*\n\n✅ *Contenido descargado exitosamente.*`, m);
+await conn.sendFile(m.chat, videoUrl, 'tt.mp4', `「 ꛕ 」 *VIDEO DE TIKTOK*\n\n✅ *Contenido descargado exitosamente.*`, m, false, { contextInfo: CANAL });
 
 await conn.sendMessage(m.chat, { text: `「 ꛕ 」 *COMPLETADO*\n▰▰▰▰▰▰▰▰▰`, edit: key });
 

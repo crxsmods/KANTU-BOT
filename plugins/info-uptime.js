@@ -1,7 +1,9 @@
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } };
+
 const handler = async (m) => {
 const uptime = process.uptime() * 1000 // en milisegundos
 const tiempo = clockString(uptime)
-m.reply(`⏱️ *Uptime:* ${tiempo}\n\n> https://kxntu.com`)
+m.reply(`⏱️ *Uptime:* ${tiempo}\n\n> https://kxntu.com`, CANAL)
 }
 handler.help = ['uptime'];
 handler.tags = ['main'];

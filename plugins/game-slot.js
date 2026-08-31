@@ -1,3 +1,5 @@
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363417790731866@newsletter', newsletterName: 'KantuBot Test ✨' } };
+
 const handler = async (m, { conn, args }) => {
 const cooldown = 30_000;
 const now = Date.now();
@@ -21,7 +23,7 @@ if (saldo < cantidad) return m.reply(`❌ No tienes suficiente ${tipo.toUpperCas
 
 const emojis = ['💎', '⚡', '🪙', '🧿', '💣', '🔮'];
 let final;
-const msg = await conn.sendMessage(m.chat, { text: renderRandom(emojis) }, { quoted: m });
+const msg = await conn.sendMessage(m.chat, { text: renderRandom(emojis), contextInfo: CANAL }, { quoted: m });
 
 for (let i = 0; i < 6; i++) {
 await delay(300);

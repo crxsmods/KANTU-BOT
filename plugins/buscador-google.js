@@ -1,6 +1,7 @@
 //import {googleIt} from '@bochilteam/scraper';
 import axios from 'axios';
 import fetch from 'node-fetch';
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363417790731866@newsletter', newsletterName: 'KantuBot Test ✨' } };
 let handler = async (m, { conn, text, command, args, usedPrefix }) => {
 if (!text) return m.reply(`⚠️ 𝙌𝙪𝙚 𝙚𝙨𝙩𝙖 𝙗𝙪𝙨𝙘𝙖𝙣𝙙𝙤 🤔 𝙀𝙨𝙘𝙧𝙞𝙗𝙖 𝙡𝙤 𝙦𝙪𝙚 𝙦𝙪𝙞𝙚𝙧𝙖 𝙗𝙪𝙨𝙘𝙖𝙧\n• 𝙀𝙟: ${usedPrefix + command} kantubot`)
 m.react("⌛") 
@@ -15,8 +16,8 @@ teks += `*${result.title}*\n_${result.url}_\n_${result.description}_\n\n──�
 }
                 
 const ss = `https://image.thum.io/get/fullpage/https://google.com/search?q=${encodeURIComponent(text)}`;
-conn.sendFile(m.chat, ss, 'result.png', teks, m);
-m.react("✅")                 
+conn.sendFile(m.chat, ss, 'result.png', teks, m, false, { contextInfo: CANAL });
+m.react("✅")
 }} catch {
 try {
 if (!info.alyachan.key) throw new Error('Alyachan no configurado');
@@ -41,4 +42,3 @@ handler.command = /^googlef?$/i
 handler.register = true
 handler.limit = 1;     
 export default handler
-

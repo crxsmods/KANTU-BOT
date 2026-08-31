@@ -1,3 +1,5 @@
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } };
+
 const cooldown = 30_000;
 const retos = new Map();
 const jugadas = new Map();
@@ -37,7 +39,7 @@ result = '𝙀𝙈𝙋𝘼𝙏𝙀 🤝';
 text += `🤝 *Empate*. No ganaste ni perdiste XP.`;
 }
 
-return m.reply(`\`「 ${result} 」\`\n\n👉 El Bot: ${botJugada}\n👉 Tú: ${input}\n` + text);
+return m.reply(`\`「 ${result} 」\`\n\n👉 El Bot: ${botJugada}\n👉 Tú: ${input}\n` + text, CANAL);
 }
 
 if (opponent) {
@@ -54,7 +56,7 @@ conn.reply(m.chat, `⏳ 𝙏𝙄𝙀𝙈𝙋𝙊 𝘼𝙂𝙊𝙏𝘼𝘿𝙊, �
 return conn.reply(m.chat, `🎮👾 𝙋𝙑𝙋 - 𝙋𝙄𝙀𝘿𝙍𝘼, 𝙋𝘼𝙋𝙀𝙇 𝙊 𝙏𝙄𝙅𝙀𝙍𝘼 👾🎮\n\n@${m.sender.split`@`[0]} 𝘿𝙀𝙎𝘼𝙁𝙄𝘼 𝘼 @${opponent.split('@')[0]}.\n\n> _*Escribe (aceptar) para aceptar*_\n> _*Escribe (rechazar) para rechazar*_`, m, { mentions: [opponent] });
 }
 
-m.reply(`𝐏𝐢𝐞𝐝𝐫𝐚 🗿, 𝐏𝐚𝐩𝐞𝐥 📄 𝐨 𝐓𝐢𝐣𝐞𝐫𝐚 ✂️\n\n👾 𝙅𝙪𝙜𝙖𝙧 𝙘𝙤𝙣 𝙚𝙡 𝙗𝙤𝙩:\n• ${usedPrefix + command} piedra\n• ${usedPrefix + command} papel\n• ${usedPrefix + command} tijera\n\n🕹 𝙅𝙪𝙜𝙖𝙧 𝙘𝙤𝙣 𝙪𝙣 𝙪𝙨𝙪𝙖𝙧𝙞𝙤:\n${usedPrefix + command} @0`);
+m.reply(`𝐏𝐢𝐞𝐝𝐫𝐚 🗿, 𝐏𝐚𝐩𝐞𝐥 📄 𝐨 𝐓𝐢𝐣𝐞𝐫𝐚 ✂️\n\n👾 𝙅𝙪𝙜𝙖𝙧 𝙘𝙤𝙣 𝙚𝙡 𝙗𝙤𝙩:\n• ${usedPrefix + command} piedra\n• ${usedPrefix + command} papel\n• ${usedPrefix + command} tijera\n\n🕹 𝙅𝙪𝙜𝙖𝙧 𝙘𝙤𝙣 𝙪𝙣 𝙪𝙨𝙪𝙖𝙧𝙞𝙤:\n${usedPrefix + command} @0`, CANAL);
 };
 
 handler.before = async (m, { conn }) => {

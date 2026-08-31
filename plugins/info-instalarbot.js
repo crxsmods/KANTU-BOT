@@ -1,3 +1,5 @@
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } }
+
 const handler = async m => {
   const repository = global.info?.md || 'https://github.com/crxsmods/KANTU-BOT'
   const text = [
@@ -15,7 +17,7 @@ const handler = async m => {
     '',
     '> https://kxntu.com'
   ].join('\n')
-  await m.reply(text)
+  await m.reply(text, CANAL)
 }
 
 handler.help = ['instalarbot']

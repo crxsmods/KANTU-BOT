@@ -4,6 +4,8 @@ import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
 import { db } from '../lib/postgres.js';
 
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363417790731866@newsletter', newsletterName: 'KantuBot Test ✨' } };
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
 const userResult = await db.query('SELECT sticker_packname, sticker_author FROM usuarios WHERE id = $1', [m.sender]);
 const user = userResult.rows[0] || {};
@@ -37,7 +39,7 @@ else return m.reply('URL invalido')
 console.error(e)
 if (!stiker) stiker = e
 } finally {
-if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: info.wm, body: ``, mediaType: 2, sourceUrl: [info.nna, info.nna2, info.md, info.yt].getRandom(), thumbnail: m.pp}}}, { quoted: m })
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { ...CANAL, externalAdReply:{ showAdAttribution: false, title: info.wm, body: ``, mediaType: 2, sourceUrl: [info.nna, info.nna2, info.md, info.yt].getRandom(), thumbnail: m.pp}}}, { quoted: m })
 else return m.reply(`🫵 Responde a un video o imagen*\n> *Usa:*  ${usedPrefix + command}`) 
 }}
 handler.help = ['sticker']

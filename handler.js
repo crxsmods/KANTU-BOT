@@ -377,16 +377,12 @@ const identity = resolveSenderIdentity(m, conn);
 m.sender = identity.resolvedJid;
 m.lid = identity.lidJid;
 
-m.reply = async (text) => {
-const contextInfo = {
-mentionedJid: await conn.parseMention(text),
-isForwarded: true,
-forwardingScore: 1,
-forwardedNewsletterMessageInfo: {
-newsletterJid: "120363178718483875@newsletter",
-newsletterName: "Kantu Bot Ofc ⚡"
-}};
+m.reply = async (text, canalFijo = null) => {
+if (canalFijo) {
+const contextInfo = { mentionedJid: await conn.parseMention(text), ...canalFijo };
 return await conn.sendMessage(chatId, { text, contextInfo }, { quoted: m });
+}
+return await conn.sendMessage(chatId, { text }, { quoted: m });
 };
 
 await smsg(conn, m); 

@@ -11,6 +11,8 @@ const formatPhoneNumber = (jid) => {
   return `+${number}`;
 };
 
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363417790731866@newsletter', newsletterName: 'KantuBot Test ✨' } };
+
 let handler = async (m, { conn }) => {
 let who = m.mentionedJid?.[0] || (m.fromMe ? conn.user?.jid : m.sender)
 
@@ -58,8 +60,8 @@ const texto = `*「 PERFIL 」*
 ${relacion}
 
 *•━━━━⪻ 𝙿𝙴𝚁𝙵𝙸𝙻 ⪼━━━━•*`
-if (buffer) await conn.sendFile(m.chat, buffer, 'perfil.jpg', texto, m)
-else await m.reply(texto)
+if (buffer) await conn.sendFile(m.chat, buffer, 'perfil.jpg', texto, m, false, { contextInfo: CANAL })
+else await m.reply(texto, CANAL)
 }
 handler.help = ['perfil', 'perfil *@user*']
 handler.tags = ['rg']

@@ -1,6 +1,7 @@
 import { sticker } from '../lib/sticker.js';
 import { db } from '../lib/postgres.js';
 import axios from 'axios';
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } };
 const handler = async (m, {conn, args, usedPrefix, command}) => {
 const userResult = await db.query('SELECT sticker_packname, sticker_author FROM usuarios WHERE id = $1', [m.sender]);
 const user = userResult.rows[0] || {};
@@ -25,7 +26,7 @@ const json = await axios.post('https://bot.lyo.su/quote/generate', obj, {headers
 const buffer = Buffer.from(json.data.result.image, 'base64');
 let stiker = await await sticker(buffer, false, f, g)
 //sticker(buffer, false, global.packname, global.author);
-if (stiker) return conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: info.wm, body: info.vs, mediaType: 2, sourceUrl: info.md, thumbnail: m.pp}}}, { quoted: m })
+if (stiker) return conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { ...CANAL, externalAdReply:{ showAdAttribution: false, title: info.wm, body: info.vs, mediaType: 2, sourceUrl: info.md, thumbnail: m.pp}}}, { quoted: m })
 }
 handler.help = ['qc'];
 handler.tags = ['sticker'];

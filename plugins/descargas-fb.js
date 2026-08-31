@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import axios from 'axios';
 
 const userRequests = {};
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363417790731866@newsletter', newsletterName: 'KantuBot Test ✨' } };
 
 const handler = async (m, { conn, args, command, usedPrefix }) => {
     // 1. Validación de enlace
@@ -71,7 +72,7 @@ const handler = async (m, { conn, args, command, usedPrefix }) => {
         if (!mediaData) throw new Error('No se pudo obtener el contenido.');
 
         const fileName = mediaData.type === 'video' ? 'video.mp4' : 'image.jpg';
-        await conn.sendFile(m.chat, mediaData.url, fileName, mediaData.caption, m);
+        await conn.sendFile(m.chat, mediaData.url, fileName, mediaData.caption, m, false, { contextInfo: CANAL });
         m.react('✅');
 
     } catch (e) {

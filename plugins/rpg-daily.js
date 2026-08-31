@@ -4,6 +4,8 @@ const bonusExp = 10000;
 const bonusLimit = 10;
 const bonusMoney = 5000;
 
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } };
+
 const handler = async (m, { conn }) => {
 const now = Date.now();
 const res = await m.db.query("SELECT exp, limite, money, lastclaim, dailystreak FROM usuarios WHERE id = $1", [m.sender]);
@@ -13,7 +15,7 @@ const streak = Number(user.dailystreak) || 0;
 const nextClaimTime = lastClaim + 86400000;
 const restante = Math.max(0, nextClaimTime - now);
 
-if (now - lastClaim < 86400000) return m.reply(`⚠️ Ya reclamaste tu recompensa diaria, vuelve en *${msToTime(restante)}* para reclamar de nuevo 🎁.`);
+if (now - lastClaim < 86400000) return m.reply(`⚠️ Ya reclamaste tu recompensa diaria, vuelve en *${msToTime(restante)}* para reclamar de nuevo 🎁.`, CANAL);
 
 const newStreak = (now - lastClaim < 172800000) ? streak + 1 : 1;
 const currentExp = free + (newStreak - 1) * expIncrease;

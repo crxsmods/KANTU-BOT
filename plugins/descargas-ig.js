@@ -3,6 +3,7 @@ import axios from 'axios';
 import { instagramdl } from '@bochilteam/scraper';
 import { fileTypeFromBuffer } from 'file-type';
 const userRequests = {};
+const CANAL = { isForwarded: true, forwardingScore: 1, forwardedNewsletterMessageInfo: { newsletterJid: '120363178718483875@newsletter', newsletterName: 'The Kantu Bot 🔥' } };
 
 const handler = async (m, { conn, args, command, usedPrefix }) => {
 const datas = global;
@@ -54,7 +55,7 @@ continue;
 
 if (!fileData) throw new Error('No se pudo descargar el archivo');
 const fileName = fileData.type === 'image' ? 'ig.jpg' : 'ig.mp4';
-await conn.sendFile(m.chat, fileData.url, fileName, fileData.caption, m);
+await conn.sendFile(m.chat, fileData.url, fileName, fileData.caption, m, false, { contextInfo: CANAL });
 await m.react('✅');
 
 } catch (e) {
