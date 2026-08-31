@@ -1,7 +1,7 @@
 import moment from 'moment-timezone'
 import { xpRange } from '../lib/levelling.js'
 import { db } from '../lib/postgres.js'
-import { tarjetasActivadas } from '../lib/simple.js'
+import { tarjetasActivadas, randomNewsletterInfo } from '../lib/simple.js'
 import fs from "fs";
 
 const cooldowns = new Map()
@@ -177,35 +177,14 @@ const handler = async (m, { conn, usedPrefix: _p, args }) => {
 
   text = String(text).replace(new RegExp(`%(${Object.keys(replace).join('|')})`, 'g'), (_, key) => replace[key] ?? '');
   
-  // ── Envío ──────────────────────────────────────────────────────────────
-  // Este bloque es el sospechoso de que el menú "se enviara" sin aparecer en
-  // el chat: WhatsApp aceptaba el mensaje (le daba ID, por eso el antispam
-  // podía citarlo después) pero el cliente no lo dibujaba. Tres cambios:
-  //
-  //  · newsletterJid configurable. El menú usaba SIEMPRE 120363178718483875,
-  //    mientras que los mensajes que sí llegan (m.reply, antispam) usan
-  //    120363371008200788 el 75% de las veces. Esa asimetría encaja con el
-  //    síntoma. MENU_NEWSLETTER_JID=off quita la etiqueta de canal del todo.
-  //  · forwardingScore 999 -> 1, como el resto del bot.
-  //  · thumbnailUrl solo si defines MENU_THUMB_URL. La que había (info.img2)
-  //    pesa 2.4 MB y tarda ~5 s en descargar; la miniatura de una tarjeta
-  //    debería pesar decenas de KB.
-  const newsletterJid = (process.env.MENU_NEWSLETTER_JID || '').trim();
   const thumbUrl = (process.env.MENU_THUMB_URL || '').trim();
 
   const contextInfo = {
     forwardingScore: 1,
     isForwarded: true,
-    mentionedJid: await conn.parseMention(text)
+    mentionedJid: await conn.parseMention(text),
+    forwardedNewsletterMessageInfo: { ...randomNewsletterInfo(), serverMessageId: 1 }
   };
-
-  if (newsletterJid && newsletterJid.toLowerCase() !== 'off') {
-    contextInfo.forwardedNewsletterMessageInfo = {
-      newsletterJid,
-      newsletterName: global.info?.wm || 'Kantu Bot',
-      serverMessageId: 1
-    };
-  }
 
   // La tarjeta (externalAdReply) va DESACTIVADA por defecto: es lo que impedía
   // que el menú se viera. Mismo interruptor global que el resto del bot

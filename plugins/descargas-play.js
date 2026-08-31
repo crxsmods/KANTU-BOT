@@ -64,6 +64,7 @@ const isAudio = command.toLowerCase().includes('mp3') || command.toLowerCase().i
 const format = isAudio ? 'mp3' : '720' 
 
 const audioApis = [
+{ url: () => fetch(`${info.mitzuki.url}/download/youtube?url=${encodeURIComponent(yt_play[0].url)}&type=audio&format=mp3&apikey=${encodeURIComponent(info.mitzuki.key)}`).then(res => res.json()), extract: (data) => ({ data: data?.data?.media?.dl_download, isDirect: false }) },
 { url: () => savetube.download(yt_play[0].url, format), extract: (data) => ({ data: data.result.download, isDirect: false }) },
 { url: () => ogmp3.download(yt_play[0].url, selectedQuality, 'audio'), extract: (data) => ({ data: data.result.download, isDirect: false }) },
 { url: () => fetch(`https://api.dorratz.com/v3/ytdl?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => { 
@@ -77,6 +78,7 @@ return { data: mp3.url, isDirect: false }}},
 }];
 
 const videoApis = [
+{ url: () => fetch(`${info.mitzuki.url}/download/youtube2?url=${encodeURIComponent(yt_play[0].url)}&apikey=${encodeURIComponent(info.mitzuki.key)}`).then(res => res.json()), extract: (data) => ({ data: data?.data?.video?.url || data?.data?.audio?.url, isDirect: false }) },
 { url: () => savetube.download(yt_play[0].url, '720'), extract: (data) => ({ data: data.result.download, isDirect: false }) },
 { url: () => ogmp3.download(yt_play[0].url, selectedQuality, 'video'), extract: (data) => ({ data: data.result.download, isDirect: false }) },
 { url: () => fetch(`https://api.siputzx.my.id/api/d/ytmp4?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => ({ data: data.dl, isDirect: false }) },

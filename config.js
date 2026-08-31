@@ -39,6 +39,7 @@ fgmods: { url: integrationConfig.fgmods.url, key: integrationConfig.fgmods.apiKe
 neoxr: { url: integrationConfig.neoxr.url, key: integrationConfig.neoxr.apiKey },
 alyachan: { url: integrationConfig.alyachan.url, key: integrationConfig.alyachan.apiKey },
 zenkey: { url: integrationConfig.zenkey.url, key: integrationConfig.zenkey.apiKey },
+mitzuki: { url: integrationConfig.mitzuki.url, key: integrationConfig.mitzuki.apiKey },
 img2: process.env.BOT_IMAGE_URL || '',
 img4: leerMedia('./media/Menu2.jpg'),
 yt: process.env.BOT_YOUTUBE_URL || repositoryUrl,

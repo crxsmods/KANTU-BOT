@@ -850,7 +850,7 @@
         },
         {
           "file": "lib/simple.js",
-          "line": 148
+          "line": 153
         },
         {
           "file": "plugins/grupo-delwarn.js",
@@ -1178,7 +1178,7 @@
       "sources": [
         {
           "file": "lib/simple.js",
-          "line": 282
+          "line": 287
         },
         {
           "file": "plugins/rpg-pareja.js",
@@ -1578,7 +1578,7 @@
         },
         {
           "file": "lib/simple.js",
-          "line": 167
+          "line": 172
         },
         {
           "file": "plugins/config-on y off.js",
@@ -2055,7 +2055,7 @@
       "sources": [
         {
           "file": "lib/simple.js",
-          "line": 156
+          "line": 161
         }
       ],
       "scopes": [
@@ -2170,7 +2170,7 @@
       "sources": [
         {
           "file": "lib/simple.js",
-          "line": 151
+          "line": 156
         }
       ],
       "scopes": [
