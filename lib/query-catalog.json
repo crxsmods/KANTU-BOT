@@ -264,7 +264,7 @@
       "sources": [
         {
           "file": "plugins/main-menu.js",
-          "line": 112
+          "line": 108
         }
       ],
       "scopes": [
@@ -308,25 +308,6 @@
       "scopes": [
         "users:read",
         "official:admin"
-      ],
-      "risk": "read"
-    },
-    {
-      "id": "18b232801b95648f643898f950eba37a4bcae52bdf68d85d9d2668b09deb88f4",
-      "text": "SELECT COUNT(*) AS total FROM usuarios WHERE registered = true",
-      "access": "read",
-      "tables": [
-        "usuarios"
-      ],
-      "parameterCount": 0,
-      "sources": [
-        {
-          "file": "plugins/rpg-reg.js",
-          "line": 104
-        }
-      ],
-      "scopes": [
-        "users:read"
       ],
       "risk": "read"
     },
@@ -885,7 +866,7 @@
         },
         {
           "file": "plugins/main-menu.js",
-          "line": 103
+          "line": 99
         },
         {
           "file": "plugins/rpg-perfil.js",
@@ -893,7 +874,7 @@
         },
         {
           "file": "plugins/rpg-reg.js",
-          "line": 9
+          "line": 15
         },
         {
           "file": "plugins/rpg-transfer.js",
@@ -1570,7 +1551,7 @@
       "sources": [
         {
           "file": "plugins/rpg-reg.js",
-          "line": 82
+          "line": 88
         }
       ],
       "scopes": [
@@ -2966,7 +2947,7 @@
       "sources": [
         {
           "file": "plugins/rpg-reg.js",
-          "line": 43
+          "line": 49
         }
       ],
       "scopes": [

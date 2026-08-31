@@ -1,7 +1,13 @@
 import { createHash, randomBytes } from 'crypto';
 import { db } from '../lib/postgres.js';
+import { paisDesdeNumero } from '../lib/pais.js';
 
 const Reg = /\|?(.*)([.|] *?)([0-9]*)$/i;
+
+const canalNotificaciones = () => {
+  const jid = (process.env.MENU_NEWSLETTER_JID || '120363371008200788@newsletter').trim();
+  return /^\d{10,30}@newsletter$/.test(jid) ? jid : '120363371008200788@newsletter';
+};
 
 const estados = {} 
 
@@ -63,7 +69,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   }
 }  
 
-handler.before = async (m, { usedPrefix }) => {
+handler.before = async (m, { conn, usedPrefix }) => {
   const who = m.sender
   const step = estados[who]?.step
   const input = (m.originalText || m.text || '').trim()
@@ -101,11 +107,23 @@ handler.before = async (m, { usedPrefix }) => {
         return m.reply('Tu usuario ya fue registrado por otra solicitud.')
       }
 
-      const totalRegResult = await db.query(`SELECT COUNT(*) AS total FROM usuarios WHERE registered = true`);
-      const rtotalreg = parseInt(totalRegResult.rows[0].total);
       delete estados[who]
 
-      return m.reply(`「 ꛕ 」 [ ✅ REGISTRO COMPLETADO ]\n\n👤 *Nombre:* ${nombre}\n🎂 *Edad:* ${edad} años\n🧬 *Género:* ${genero}\n🔢 *S/N:* ${serial}\n\n◉ *Total registrados:* ${rtotalreg}`);
+      const pais = paisDesdeNumero(who)
+      const botNum = (conn.user?.id || '').replace(/:\d+/, '').split('@')[0]
+      const sn = createHash('md5').update(who).digest('hex')
+      const fecha = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      const aviso = `◉ Usuarios: ${m.pushName || nombre} 💔👑
+◉ País: ${pais.nombre} ${pais.bandera}
+◉ Verificación: ${nombre}
+◉ Edad: ${edad} años
+◉ Fecha: ${fecha}
+◉ Bot: wa.me/${botNum}?text=/code
+◉ Número de serie:
+⤷ ${sn}`
+
+      await conn.sendMessage(canalNotificaciones(), { text: aviso }).catch(() => {})
+      return m.reply(aviso)
     }
   }
 }
