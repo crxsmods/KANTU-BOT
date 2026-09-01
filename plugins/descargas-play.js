@@ -66,24 +66,20 @@ const format = isAudio ? 'mp3' : '720'
 const audioApis = [
 { url: () => { if (!info.neoxr.key) throw new Error('Neoxr no configurado'); return fetch(`${info.neoxr.url}/youtube?url=${encodeURIComponent(yt_play[0].url)}&type=audio&quality=128kbps&apikey=${encodeURIComponent(info.neoxr.key)}`).then(res => res.json()) }, extract: (data) => ({ data: data?.data?.url, isDirect: false }) },
 { url: () => savetube.download(yt_play[0].url, format), extract: (data) => ({ data: data?.result?.download, isDirect: false }) },
-{ url: () => ogmp3.download(yt_play[0].url, selectedQuality, 'audio'), extract: (data) => ({ data: data.result.download, isDirect: false }) },
-{ url: () => fetch(`https://api.dorratz.com/v3/ytdl?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => { 
-const mp3 = data.medias.find(media => media.quality === "160kbps" && media.extension === "mp3");
-return { data: mp3?.url, isDirect: false }}},
+{ url: () => ogmp3.download(yt_play[0].url, selectedQuality, 'audio'), extract: (data) => ({ data: data?.result?.download, isDirect: false }) },
+{ url: () => fetch(`https://api.dorratz.com/v3/ytdl?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => ({ data: data?.medias?.find?.(media => media.quality === "160kbps" && media.extension === "mp3")?.url, isDirect: false }) },
 { url: () => fetch(`https://api.siputzx.my.id/api/d/ytmp4?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => ({ data: data?.dl, isDirect: false }) },
-{ url: () => fetch(`${info.apis}/download/ytmp3?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => ({ data: data.status ? data.data.download.url : null, isDirect: false }) },
-{ url: () => fetch(`https://exonity.tech/api/dl/playmp3?query=${yt_play[0].title}`).then(res => res.json()), extract: (data) => ({ data: data.result.download, isDirect: false }) 
-}];
+{ url: () => fetch(`${info.apis}/download/ytmp3?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => ({ data: data?.status ? data?.data?.download?.url : null, isDirect: false }) }
+];
 
 const videoApis = [
 { url: () => { if (!info.neoxr.key) throw new Error('Neoxr no configurado'); return fetch(`${info.neoxr.url}/youtube?url=${encodeURIComponent(yt_play[0].url)}&type=video&quality=720p&apikey=${encodeURIComponent(info.neoxr.key)}`).then(res => res.json()) }, extract: (data) => ({ data: data?.data?.url, isDirect: false }) },
 { url: () => savetube.download(yt_play[0].url, '720'), extract: (data) => ({ data: data?.result?.download, isDirect: false }) },
 { url: () => ogmp3.download(yt_play[0].url, selectedQuality, 'video'), extract: (data) => ({ data: data?.result?.download, isDirect: false }) },
 { url: () => fetch(`https://api.siputzx.my.id/api/d/ytmp4?url=${yt_play[0].url}`).then(res => res.json()), extract: (data) => ({ data: data?.dl, isDirect: false }) },
-{ url: () => { if (!info.fgmods.key) throw new Error('FGMods no configurado'); return fetch(`${info.fgmods.url}/downloader/ytmp4?url=${encodeURIComponent(yt_play[0].url)}&apikey=${encodeURIComponent(info.fgmods.key)}`).then(res => res.json()) }, extract: (data) => ({ data: data.result.dl_url, isDirect: false }) },
-{ url: () => fetch(`${info.apis}/download/ytmp4?url=${encodeURIComponent(yt_play[0].url)}`).then(res => res.json()), extract: (data) => ({ data: data.status ? data.data.download.url : null, isDirect: false }) },
-{ url: () => fetch(`https://exonity.tech/api/dl/playmp4?query=${encodeURIComponent(yt_play[0].title)}`).then(res => res.json()), extract: (data) => ({ data: data.result.download, isDirect: false })
-}];
+{ url: () => { if (!info.fgmods.key) throw new Error('FGMods no configurado'); return fetch(`${info.fgmods.url}/downloader/ytmp4?url=${encodeURIComponent(yt_play[0].url)}&apikey=${encodeURIComponent(info.fgmods.key)}`).then(res => res.json()) }, extract: (data) => ({ data: data?.result?.dl_url, isDirect: false }) },
+{ url: () => fetch(`${info.apis}/download/ytmp4?url=${encodeURIComponent(yt_play[0].url)}`).then(res => res.json()), extract: (data) => ({ data: data?.status ? data?.data?.download?.url : null, isDirect: false }) }
+];
 
 const download = async (apis) => {
 let mediaData = null;

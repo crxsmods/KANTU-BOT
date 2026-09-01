@@ -11,7 +11,7 @@ import qrcodeTerminal from "qrcode-terminal";
 import QRCode from "qrcode";
 import pino from "pino";
 import NodeCache from 'node-cache';
-import { startSubBot } from "./lib/subbot.js";
+import { startSubBot, deadSubbots } from "./lib/subbot.js";
 import "./config.js";
 import { handler, callUpdate, participantsUpdate, groupsUpdate } from "./handler.js";
 import { loadPlugins } from './lib/plugins.js';
@@ -152,6 +152,7 @@ let usarCodigo = false;
 let numero = "";
 let ultimoQr = "";
 let reconnectAttempts = 0;
+let rechazosSesion = 0;
 let maintenanceStarted = false;
 
 // Prefijos de ID que identifican a otros bots de forma inequívoca.
@@ -432,6 +433,11 @@ const credsPath = path.join(sessionPath, "creds.json");
 if (!fs.existsSync(credsPath)) continue;
 if (globalThis.conns?.some(conn => conn.userId === userId)) continue;
 if (reconectando.has(userId)) continue;
+if (deadSubbots.has(userId)) continue;
+
+let registrado = false;
+try { registrado = Boolean(JSON.parse(fs.readFileSync(credsPath, "utf8"))?.registered); } catch {}
+if (!registrado) continue;
 
 try {
 reconectando.add(userId);
@@ -522,6 +528,7 @@ qrcodeTerminal.generate(qr, { small: true });
 if (connection === "open") {
 updateHealth('whatsapp', { connected: true, status: 'connected', changedAt: new Date().toISOString() });
 ultimoQr = "";
+rechazosSesion = 0;
 if (fs.existsSync(BOT_QR_PATH)) fs.unlinkSync(BOT_QR_PATH);
 const connTime = new Date().toLocaleTimeString('es-MX', { hour12: false });
 
@@ -555,7 +562,8 @@ if (mobile) {
 
 if (connection === "close") {
 updateHealth('whatsapp', { connected: false, status: 'disconnected', changedAt: new Date().toISOString(), code });
-if ([401, 440, 428, 405].includes(code)) {
+const yaRegistrado = state.creds.registered;
+const mostrarErrorSesion = () => {
 if (mobile) {
   createBox(
     chalk.bold.white(' ❌ ERROR SESIÓN'),
@@ -583,19 +591,26 @@ if (mobile) {
     theme.error
   );
 }
+};
+
+// Antes de vincular no se reintenta con códigos de sesión: evita el loop
+// infinito en paneles cuando requestPairingCode falla en silencio.
+if (!yaRegistrado && [401, 440, 428, 405].includes(code)) {
+  mostrarErrorSesion();
+  log.error(`Sesión inválida (código ${code}) antes de completar la vinculación. Elimina "BotSession" y reinicia para vincular de nuevo.`);
+  return;
 }
 
-// No reintentar indefinidamente si el cierre ocurrió antes de completar
-// el emparejamiento (usuario nunca llegó a vincularse) o si el código de
-// error indica que la sesión fue cerrada/baneada. Esto evita el loop
-// infinito observado en paneles de hosting cuando requestPairingCode
-// falla silenciosamente y el bot jamás llega a state.creds.registered.
-const sesionInvalida = [401, 440, 428, 405].includes(code);
-const yaRegistrado = state.creds.registered;
-
-if (sesionInvalida) {
-  log.error(`Sesión inválida (código ${code}). No se reintentará automáticamente. Elimina "BotSession" y reinicia para vincular de nuevo.`);
-  return;
+if ([401, 440].includes(code)) {
+  rechazosSesion++;
+  if (rechazosSesion >= 5) {
+    mostrarErrorSesion();
+    log.error(`La sesión fue rechazada ${rechazosSesion} veces seguidas (código ${code}). Elimina "BotSession" y vincula de nuevo.`);
+    return;
+  }
+  log.warn(`Sesión rechazada (código ${code}). Reintento ${rechazosSesion}/5...`);
+} else {
+  rechazosSesion = 0;
 }
 
 if (usarCodigo && !yaRegistrado) {
